@@ -1,0 +1,83 @@
+module concur
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+import std/core = std/core = "";
+// Utility function to access the DOM inside a browser.
+import sys/dom = sys/dom = "";
+/* String dictionaries.
+*/
+import std/data/dict = std/data/dict = "";
+// Basic types of the HTML5 DOM model
+import sys/dom/types = sys/dom/types = "";
+import sys/dom/document = sys/dom/document = "";
+import sys/dom/html/window = sys/dom/html/window = "";
+import concur/dom = concur/dom = "";
+/* Props
+*/
+import concur/props = concur/props = "";
+// Stateful funs can manipulate heap `:h` using allocations, reads and writes.
+private alias st<(h :: H)> :: H -> E = <(read :: H -> X)<(h :: H)>,(write :: H -> X)<(h :: H)>,(alloc :: H -> X)<(h :: H)>> = 1;
+// An alias for pure effects: a pure function always returns the same result
+// when called with the same arguments but may not terminate or raise an exception.
+private alias pure :: E = <(exn :: X),(div :: X)> = 1;
+type st <(h :: H)> :: H -> V {
+  con St(prevNode: (ref :: (H, V) -> V)<(h :: H),(maybe :: V -> V)<concur/dom/vnode>>, container: sys/dom/types/htmlElement) : forall<(h :: H)> (prevNode : (ref :: (H, V) -> V)<(h :: H),(maybe :: V -> V)<concur/dom/vnode>>, container : sys/dom/types/htmlElement) -> (st :: H -> V)<(h :: H)>;
+};
+// Automatically generated. Retrieves the `prevNode` constructor field of the `:st` type.
+public fun prevNode : forall<h> (st : st<h>) -> ref<h,maybe<concur/dom/vnode>>
+  = forall<h> fun(st:st<h>){
+    match (st) {
+      concur/St(.x, _) -> .x
+    }
+  };
+// Automatically generated. Retrieves the `container` constructor field of the `:st` type.
+public fun container : forall<h> (st : st<h>) -> sys/dom/types/htmlElement
+  = forall<h> fun(st:st<h>){
+    match (st) {
+      concur/St(_, .x) -> .x
+    }
+  };
+public fun (.copy) : forall<h> (st<h>, prevNode : ?ref<h,maybe<concur/dom/vnode>>, container : ?sys/dom/types/htmlElement) -> st<h>
+  = forall<h> fun(.this:st<h>, prevNode0:?ref<h,maybe<concur/dom/vnode>>, container0:?sys/dom/types/htmlElement){
+    val (.prevNode) .60 : ref<h,maybe<concur/dom/vnode>>
+      = match (prevNode0) {
+        std/core/Optional(.prevNode.61) -> .prevNode.61
+        _ -> concur/prevNode{1,1,fast}(.this)
+      };;
+    val (.container) .67 : sys/dom/types/htmlElement
+      = match (container0) {
+        std/core/Optional(.container.68) -> .container.68
+        _ -> concur/container{1,1,fast}(.this)
+      };;
+    concur/St(.prevNode.60, .container.67)
+  };
+// Render function
+public fun render : (state : int, st : st<sys/dom/types/hdom>) -> <st<sys/dom/types/hdom>,pure,ui,net,console,ndet> ()
+  = fun<<ui,exn,net,alloc<sys/dom/types/hdom>,console,ndet,read<sys/dom/types/hdom>,write<sys/dom/types/hdom>,div>>(state:int, st:st<sys/dom/types/hdom>){
+    val prevNode0 : ref<sys/dom/types/hdom,maybe<concur/dom/vnode>>
+      = concur/prevNode{1,1,fast}(st);;
+    val prevNodeVal : maybe<concur/dom/vnode>
+      = std/core/(!.1){@}(prevNode0);;
+    std/core/set{@}(prevNode0, (std/core/Just((concur/dom/patch{0,3,fast}((std/core/null{1,1,fast}(prevNodeVal)), (concur/view{0,2,fast}(state, st)), (concur/container{1,1,fast}(st)))))))
+  };
+// View function
+public fun view : (count : int, st : st<sys/dom/types/hdom>) -> <st<sys/dom/types/hdom>,pure,ui,net,console,ndet> concur/dom/vnode
+  = fun<<ui,exn,net,alloc<sys/dom/types/hdom>,console,ndet,read<sys/dom/types/hdom>,write<sys/dom/types/hdom>,div>>(count:int, st0:st<sys/dom/types/hdom>){
+    concur/dom/h{0,3,fast}("div", (concur/props/props{1,0,fast}()), (std/core/vector.3{1,1,fast}((std/core/Cons((concur/dom/h{0,3,fast}("h1", (concur/props/props{1,0,fast}()), (std/core/vector.3{1,1,fast}((std/core/Cons((concur/dom/t{0,1,fast}((std/core/show.1{0,1,fast}(count)))), std/core/Nil)))))), (std/core/Cons((concur/dom/h{0,3,fast}("button", (concur/props/props.1{1,1,fast}((std/core/Cons((std/core/(,)("onclick", (concur/props/mkHandler0{1,1,fast}((fun<<ui,exn,net,alloc<sys/dom/types/hdom>,console,ndet,read<sys/dom/types/hdom>,write<sys/dom/types/hdom>,div>>(){
+                  (concur/render{0,2,fast}((std/core/(-){@}(count, 1)), st0))
+                }))))), std/core/Nil)))), (std/core/vector.3{1,1,fast}((std/core/Cons((concur/dom/t{0,1,fast}("-")), std/core/Nil)))))), (std/core/Cons((concur/dom/h{0,3,fast}("button", (concur/props/props.1{1,1,fast}((std/core/Cons((std/core/(,)("onclick", (concur/props/mkHandler0{1,1,fast}((fun<<ui,exn,net,alloc<sys/dom/types/hdom>,console,ndet,read<sys/dom/types/hdom>,write<sys/dom/types/hdom>,div>>(){
+                    (concur/render{0,2,fast}((std/core/(+){@}(count, 1)), st0))
+                  }))))), std/core/Nil)))), (std/core/vector.3{1,1,fast}((std/core/Cons((concur/dom/t{0,1,fast}("+")), std/core/Nil)))))), std/core/Nil)))))))))
+  };
+// Main
+public fun main : () -> <st<sys/dom/types/hdom>,pure,ui,net,console,ndet> ()
+  = fun<<ui,div,exn,net,alloc<sys/dom/types/hdom>,console,ndet,read<sys/dom/types/hdom>,write<sys/dom/types/hdom>>>(){
+    val prevNode0 : ref<sys/dom/types/hdom,maybe<concur/dom/vnode>>
+          = std/core/ref{@}(std/core/Nothing);
+    sys/dom/withWindow{1,1,poly}((fun<<ui,div,exn,net,alloc<sys/dom/types/hdom>,console,ndet,read<sys/dom/types/hdom>,write<sys/dom/types/hdom>>>(window:sys/dom/types/window){
+      (concur/render{0,2,fast}(0, (concur/St(prevNode0, (sys/dom/document/body{@}((sys/dom/html/window/document{@}(window))))))))
+    }))
+  };

@@ -1,0 +1,91 @@
+// Utility function to access the DOM inside a browser.
+module sys/dom
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+import std/core = std/core = "";
+// Basic types of the HTML5 DOM model
+import sys/dom/types = sys/dom/types = "";
+// Stateful funs can manipulate heap `:h` using allocations, reads and writes.
+private alias st<(h :: H)> :: H -> E = <(read :: H -> X)<(h :: H)>,(write :: H -> X)<(h :: H)>,(alloc :: H -> X)<(h :: H)>> = 1;
+private alias sys/dom/types/dom :: E = <(exn :: X),(ndet :: X),(console :: X),(net :: X),(ui :: X),((st :: H -> E)<(sys/dom/types/hdom :: H)> == 1 <(read :: H -> X)<(sys/dom/types/hdom :: H)>,(write :: H -> X)<(sys/dom/types/hdom :: H)>,(alloc :: H -> X)<(sys/dom/types/hdom :: H)>>)> = 2;
+fun* (.bind-applyWindow) : forall<e> (action : (sys/dom/types/window) -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> bool
+  = forall<e> fun<<sys/dom/types/dom|e>>(action:(sys/dom/types/window) -> <sys/dom/types/dom|e> ()){
+    sys/dom/(.extern-applyWindow){@}(action)
+  };
+fun (.fast-applyWindow) : forall<e> (action : (sys/dom/types/window) -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> bool
+  = forall<e> fun<<sys/dom/types/dom|e>>(action:(sys/dom/types/window) -> <sys/dom/types/dom|e> ()){
+    sys/dom/(.extern-applyWindow){@}(action)
+  };
+fun** applyWindow : forall<e> (action : (sys/dom/types/window) -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> bool
+  = forall<e> fun<<sys/dom/types/dom|e>>(action:(sys/dom/types/window) -> <sys/dom/types/dom|e> ()){
+    sys/dom/(.bind-applyWindow){1,1,bind}(action)
+  };
+// Execute an action on a specified interval.
+public fun* (.bind-interval) : forall<e> (msecs : int, action : () -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> ()
+  = forall<e> fun<<sys/dom/types/dom|e>>(msecs:int, action:() -> <sys/dom/types/dom|e> ()){
+    sys/dom/(.extern-interval){@}(msecs, action)
+  };
+// Execute an action on a specified interval.
+public fun (.fast-interval) : forall<e> (msecs : int, action : () -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> ()
+  = forall<e> fun<<sys/dom/types/dom|e>>(msecs:int, action:() -> <sys/dom/types/dom|e> ()){
+    sys/dom/(.extern-interval){@}(msecs, action)
+  };
+// Execute an action on a specified interval.
+public fun** interval : forall<e> (msecs : int, action : () -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> ()
+  = forall<e> fun<<sys/dom/types/dom|e>>(msecs:int, action:() -> <sys/dom/types/dom|e> ()){
+    sys/dom/(.bind-interval){1,2,bind}(msecs, action)
+  };
+// Execute an action after a specified time out.
+public fun* (.bind-timeout) : forall<e> (msecs : int, action : () -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> ()
+  = forall<e> fun<<sys/dom/types/dom|e>>(msecs:int, action:() -> <sys/dom/types/dom|e> ()){
+    sys/dom/(.extern-timeout){@}(msecs, action)
+  };
+// Execute an action after a specified time out.
+public fun (.fast-timeout) : forall<e> (msecs : int, action : () -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> ()
+  = forall<e> fun<<sys/dom/types/dom|e>>(msecs:int, action:() -> <sys/dom/types/dom|e> ()){
+    sys/dom/(.extern-timeout){@}(msecs, action)
+  };
+// Execute an action after a specified time out.
+public fun** timeout : forall<e> (msecs : int, action : () -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> ()
+  = forall<e> fun<<sys/dom/types/dom|e>>(msecs:int, action:() -> <sys/dom/types/dom|e> ()){
+    sys/dom/(.bind-timeout){1,2,bind}(msecs, action)
+  };
+// Execute an action that gains access to the global ":window" object. 
+public fun* (.bind-withWindow) : forall<e> (action : (sys/dom/types/window) -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> ()
+  = forall<e> fun<<sys/dom/types/dom|e>>(action:(sys/dom/types/window) -> <sys/dom/types/dom|e> ()){
+    std/core/bind{@}((sys/dom/(.bind-applyWindow){1,1,bind}(action)), (fun<<sys/dom/types/dom|e>>(success:bool){
+        match ((std/core/(!){@}(success))) {
+          std/core/True() -> std/core/error{1,1,fast}("this application can only run inside a browser")
+          std/core/False() -> std/core/()
+        }
+      }))
+  };
+// Execute an action that gains access to the global ":window" object. 
+public fun (.fast-withWindow) : forall<e> (action : (sys/dom/types/window) -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> ()
+  = forall<e> fun<<sys/dom/types/dom|e>>(action:(sys/dom/types/window) -> <sys/dom/types/dom|e> ()){
+    val success : bool
+          = sys/dom/(.fast-applyWindow){1,1,fast}(action);
+    match ((std/core/(!){@}(success))) {
+      std/core/True() -> std/core/error{1,1,fast}("this application can only run inside a browser")
+      std/core/False() -> std/core/()
+    }
+  };
+// Execute an action that gains access to the global ":window" object. 
+public fun** withWindow : forall<e> (action : (sys/dom/types/window) -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> ()
+  = forall<e> fun<<sys/dom/types/dom|e>>(action:(sys/dom/types/window) -> <sys/dom/types/dom|e> ()){
+    sys/dom/(.bind-withWindow){1,1,bind}(action)
+  };
+external (.extern-applyWindow) : forall<e> (action : (sys/dom/types/window) -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> bool {
+  js inline "(typeof window !== 'undefined' ? (function(){ (#1)(window); return true; })() : false)";
+}
+// Execute an action after a specified time out.
+external (.extern-timeout) : forall<e> (msecs : int, action : () -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> () {
+  js inline "window.setTimeout(#2,#1)";
+}
+// Execute an action on a specified interval.
+external (.extern-interval) : forall<e> (msecs : int, action : () -> <sys/dom/types/dom|e> ()) -> <sys/dom/types/dom|e> () {
+  js inline "window.setInterval(#2,#1)";
+}

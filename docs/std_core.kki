@@ -1,0 +1,1612 @@
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+module interface std/core
+infixr 80 (^)
+infixl 70 (*)
+infixl 70 (%)
+infixl 70 (/)
+infixl 70 cdiv
+infixl 70 cmod
+infixl 60 (+)
+infixl 60 (-)
+infix 40 (!=)
+infix 40 (==)
+infix 40 (<=)
+infix 40 (>=)
+infix 40 (<)
+infix 40 (>)
+infixr 30 (&&)
+infixr 20 (||)
+// The unit type `:()` is inhabited by just a single value, namely `()`.
+// See also the `:void` type and the `:bool` type.
+type () {
+  // The unit type `:()` is inhabited by just a single value, namely `()`.
+// See also the `:void` type and the `:bool` type.
+  con () : ();
+};
+// The exception effect: a partial function may raise an exception.
+type exn :: X ;
+// The divergence effect: a divergent function may not terminate.
+type div :: X ;
+// The alloc effect signifies a function may allocate in a heap `:h`
+type alloc <(h :: H)> :: H -> X ;
+// The read effect: signifies that a function may read from from heap `:h`.
+type read <(h :: H)> :: H -> X ;
+// The write effect: signifies that a function may write to heap `:h`.
+type write <(h :: H)> :: H -> X ;
+// The _total_ effect represents the absence of any effect.
+type <> :: E ;
+// The effect constructor extends an effect with another effect.
+type <|> <(a :: X),(e :: E)> :: (X, E) -> E ;
+// Stateful funs can manipulate heap `:h` using allocations, reads and writes.
+alias st<(h :: H)> :: H -> E = <(read :: H -> X)<(h :: H)>,(write :: H -> X)<(h :: H)>,(alloc :: H -> X)<(h :: H)>> = 1;
+// The `:ui` effect signifies a function may access the graphics system
+type ui :: X ;
+// The `:net` effect signifies a function may access the network
+type net :: X ;
+// The console effect signifies that a function may read or write to the console.
+type console :: X ;
+// The `:file` effect signifies a function may access the file system
+type file :: X ;
+// The `:global` heap is a special heap constant to denote the global shared heap
+type global :: H ;
+// NonDeterminism: a nonDeterministic function may return varying
+// results even when called with the same input values.
+type ndet :: X ;
+// The `:io-total` effect is used for functions that perform arbitrary I/O operations, but are terminating without raising exceptions.
+alias io-total :: E = <(ndet :: X),(console :: X),(net :: X),(file :: X),(ui :: X),((st :: H -> E)<(global :: H)> == 1 <(read :: H -> X)<(global :: H)>,(write :: H -> X)<(global :: H)>,(alloc :: H -> X)<(global :: H)>>)> = 2;
+// The `:io-noexn` effect is used for functions that perform arbitrary I/O operations, but raise no exceptions
+alias io-noexn :: E = <(div :: X),((io-total :: E) == 2 <(ndet :: X),(console :: X),(net :: X),(file :: X),(ui :: X),((st :: H -> E)<(global :: H)> == 1 <(read :: H -> X)<(global :: H)>,(write :: H -> X)<(global :: H)>,(alloc :: H -> X)<(global :: H)>>)>)> = 3;
+// The `:io` effect is used for functions that perform arbitrary I/O operations.
+alias io :: E = <(exn :: X),((io-noexn :: E) == 3 <(div :: X),((io-total :: E) == 2 <(ndet :: X),(console :: X),(net :: X),(file :: X),(ui :: X),((st :: H -> E)<(global :: H)> == 1 <(read :: H -> X)<(global :: H)>,(write :: H -> X)<(global :: H)>,(alloc :: H -> X)<(global :: H)>>)>)>)> = 4;
+// A pair of values `:a` and `:b`.
+type (,) <a,b> :: (V, V) -> V {
+  // A pair of values `:a` and `:b`.
+  con (,)(fst: a, snd: b) : forall<a,b> (fst : a, snd : b) -> (a, b);
+};
+// An any type. Used for extern calls
+type any ;
+// An arbitrary precision signed integer.
+type int ;
+// A reference `:ref<h,a>` points to a value of type `:a` in heap `:h`.
+type ref <(h :: H),a> :: (H, V) -> V ;
+// Exceptions
+type exception ;
+// A `:try` type represents a first-class exception result.
+type try <a> :: V -> V {
+  con Exn(exception: exception) : forall<a> (exception : exception) -> (try :: V -> V)<a>;
+  con Ok(result: a) : forall<a> (result : a) -> (try :: V -> V)<a>;
+};
+// Yield alias
+alias yld<a> :: V -> V = a = 1;
+// A triple of values.
+type (,,) <a,b,c> :: (V, V, V) -> V {
+  // A triple of values.
+  con (,,)(fst: a, snd: b, thd: c) : forall<a,b,c> (fst : a, snd : b, thd : c) -> (a, b, c);
+};
+// A quadruple of values.
+type (,,,) <a,b,c,d> :: (V, V, V, V) -> V {
+  // A quadruple of values.
+  con (,,,)(fst: a, snd: b, thd: c, field4: d) : forall<a,b,c,d> (fst : a, snd : b, thd : c, field4 : d) -> (a, b, c, d);
+};
+// A quintuple of values.
+type (,,,,) <a,b,c,d,a1> :: (V, V, V, V, V) -> V {
+  // A quintuple of values.
+  con (,,,,)(fst: a, snd: b, thd: c, field4: d, field5: a1) : forall<a,b,c,d,a1> (fst : a, snd : b, thd : c, field4 : d, field5 : a1) -> (a, b, c, d, a1);
+};
+// The `:blocking` effect signifies that a function may block
+type blocking :: X ;
+// The type of booleans has two inhabitants: `True` and `False`.
+type bool {
+  con False : bool;
+  con True : bool;
+};
+// A unicode character.
+// Characters are unicode _codepoint_\/s.
+// This is different from a unicode _grapheme_ which represents a single displayed
+// symbol and can consists of multiple codepoints due to combining characters and marks.
+// (see also the [``std/text/unicode``](std_text_unicode.html) module.)
+type char ;
+// The choice type represents one of two possible types `:a` or `:b`.
+type either <a,b> :: (V, V) -> V {
+  con Left(left: a) : forall<a,b> (left : a) -> (either :: (V, V) -> V)<a,b>;
+  con Right(right: b) : forall<a,b> (right : b) -> (either :: (V, V) -> V)<a,b>;
+};
+// Delayed (or _lazy_) values are computed (with effect `:e`) only the first time
+// `force` is called and cached afterwards.
+type delayed <(e :: E),a> :: (E, V) -> V {
+  
+};
+// A 64-bit IEEE 754 floating point value.
+// See also `std/num/double` for more operations on `:double`s.
+type double ;
+// The predicate `:ediv<x,a,e>` signifies that if the type `:a` contains a reference to effect constant `:x",
+// then the effect `:e` must contain the divergent effect (`:div`). This constraint is generated
+// for operations on first-class effects where code can diverge through operations.
+type ediv <(a :: X),b,(e :: E)> :: (X, V, E) -> P ;
+// A string is a sequence of unicode character points (`char`).
+// The encoding of a string is internal and there
+// is no constant-time indexing of characters in a string.
+// Use the `:sslice` type for efficient matching and retrieving
+// sub-strings from string.\
+// See also the [``std/text/string``](std_text_string.html) module.
+type string ;
+type open exception-info {
+  con Error : exception-info;
+  con Assert : exception-info;
+  con Todo : exception-info;
+  con Range : exception-info;
+  con Finalize : exception-info;
+  con Pattern(location: string, definition: string) : (location : string, definition : string) -> exception-info;
+  con System(errno: string) : (errno : string) -> exception-info;
+  con Internal(name: string) : (name : string) -> exception-info;
+};
+// The `:global-scope` is a special type constant to denote the global scope
+type global-scope :: S ;
+// Handled effects are lifted to an atomic effect using the `:handled` type constructor
+type handled <(a :: HX)> :: HX -> X ;
+// Linear effects are lifted to an atomic effect using the `:handled1` type constructor
+type handled1 <(a :: HX1)> :: HX1 -> X ;
+type handler-branch0 <(e :: E),a> :: (E, V) -> V ;
+type handler-branch1 <(e :: E),a,b> :: (E, V, V) -> V ;
+// The predicate `:hdiv<h,a,e>` signifies that if the type `:a` contains a reference to `:h`,
+// then the effect `:e` must contain the divergent effect (`:div`). This constraint is generated
+// when writing to the heap (see `(!)`) and is necessary to catch cases where code can diverge
+// by storing self referential functions in the heap.
+type hdiv <(h :: H),a,(e :: E)> :: (H, V, E) -> P ;
+;
+// The type of lists, which can be either empty (`Nil`) or an element followed
+// by a list (`Cons`).
+type rec list <a> :: V -> V {
+  // The empty list.
+  con Nil : forall<a> (list :: V -> V)<a>;
+  // A ``head``  element followed by the ``tail``  of the list.
+  con Cons(head: a, tail: (list :: V -> V)<a>) : forall<a> (head : a, tail : (list :: V -> V)<a>) -> (list :: V -> V)<a>;
+};
+// The `:maybe` type is used to represent either a value (`Just(x)`) or `Nothing`.
+// This type is often used to represent values that can be _null_.
+type maybe <a> :: V -> V {
+  con Nothing : forall<a> (maybe :: V -> V)<a>;
+  con Just(value: a) : forall<a> (value : a) -> (maybe :: V -> V)<a>;
+};
+// Abstract type used for passing `null` values to external functions
+type null <a> :: V -> V ;
+// Optional is used internally by the compiler to pass optional arguments.
+// It is usually displayed as `:?a` for some type `:a`.
+type optional <a> :: V -> V {
+  // The `Optional` constructor is used when an optional argument is given.
+  con Optional(value: a) : forall<a> (value : a) -> ?a;
+  // `None` is used when an optional argument is not provided.
+  con None : forall<a> ?a;
+};
+// An enumeration to represent order
+type order {
+  con Lt : order;
+  con Eq : order;
+  con Gt : order;
+};
+// An alias for pure effects: a pure function always returns the same result
+// when called with the same arguments but may not terminate or raise an exception.
+alias pure :: E = <(exn :: X),(div :: X)> = 1;
+// Resources identify specific handlers
+type resource <(a :: HX)> :: HX -> V {
+  con .Resource(int) : forall<(a :: HX)> (int) -> (resource :: HX -> V)<(a :: HX)>;
+};
+type resume-context <a,(e :: E),b> :: (V, E, V) -> V ;
+type resume-context1 <a,(e :: E),b,c> :: (V, E, V, V) -> V ;
+// A `:sslice` represents a sub-slice of string and
+// has a specific start position and character count. It is used
+// instead of string indices to make the actual internal representation
+// of strings abstract (like UTF-8 or UTF-16). String slices are
+// returned by functions that find sub strings or patterns in
+// in strings. Use `string:(slice : sslice) -> string` to
+// create a fresh substring from a slice.
+type sslice {
+  
+};
+// A `:stream` is a co-inductive type reprenting an infinite list of elements.
+cotype rec stream <a> :: V -> V {
+  con Next(head: a, tail: (stream :: V -> V)<a>) : forall<a> (head : a, tail : (stream :: V -> V)<a>) -> (stream :: V -> V)<a>;
+};
+// An alias for the empty effect.
+alias total :: E = <> = 1;
+// The type of immutable arrays is called `:vector`.
+type vector <a> :: V -> V ;
+// The `:void` type is empty and has no constructors.
+// See also the `:()` unit type and the `:bool` type.
+type void ;
+type extend exception-info {
+  
+};
+// Raise a pattern match exception. This is function is used internally by the
+// compiler to generate error messages on pattern match failures.
+fun error-pattern : forall<a> (location : string, definition : string) -> <(exn :: X)> a;
+fun (.copy) : (()) -> ();
+// Automatically generated. Retrieves the `fst` constructor field of the `:(,)` type.
+fun fst : forall<a,b> ((a, b)) -> a;
+// Automatically generated. Retrieves the `snd` constructor field of the `:(,)` type.
+fun snd : forall<a,b> ((a, b)) -> b;
+fun (.copy) .1 : forall<a,b> ((a, b), fst : ?a, snd : ?b) -> (a, b);
+// Automatically generated. Tests for the `Exn` constructor of the `:try` type.
+fun exn? : forall<a> (try : (try :: V -> V)<a>) -> bool;
+// Automatically generated. Tests for the `Ok` constructor of the `:try` type.
+fun ok? : forall<a> (try : (try :: V -> V)<a>) -> bool;
+// Automatically generated. Retrieves the `fst` constructor field of the `:(,,)` type.
+fun fst .1 : forall<a,b,c> ((a, b, c)) -> a;
+// Automatically generated. Retrieves the `snd` constructor field of the `:(,,)` type.
+fun snd .1 : forall<a,b,c> ((a, b, c)) -> b;
+// Automatically generated. Retrieves the `thd` constructor field of the `:(,,)` type.
+fun thd : forall<a,b,c> ((a, b, c)) -> c;
+fun (.copy) .2 : forall<a,b,c> ((a, b, c), fst : ?a, snd : ?b, thd : ?c) -> (a, b, c);
+// Automatically generated. Retrieves the `fst` constructor field of the `:(,,,)` type.
+fun fst .2 : forall<a,b,c,d> ((a, b, c, d)) -> a;
+// Automatically generated. Retrieves the `snd` constructor field of the `:(,,,)` type.
+fun snd .2 : forall<a,b,c,d> ((a, b, c, d)) -> b;
+// Automatically generated. Retrieves the `thd` constructor field of the `:(,,,)` type.
+fun thd .1 : forall<a,b,c,d> ((a, b, c, d)) -> c;
+// Automatically generated. Retrieves the `field4` constructor field of the `:(,,,)` type.
+fun field4 : forall<a,b,c,d> ((a, b, c, d)) -> d;
+fun (.copy) .3 : forall<a,b,c,d> ((a, b, c, d), fst : ?a, snd : ?b, thd : ?c, field4 : ?d) -> (a, b, c, d);
+// Automatically generated. Retrieves the `fst` constructor field of the `:(,,,,)` type.
+fun fst .3 : forall<a,b,c,d,a1> ((a, b, c, d, a1)) -> a;
+// Automatically generated. Retrieves the `snd` constructor field of the `:(,,,,)` type.
+fun snd .3 : forall<a,b,c,d,a1> ((a, b, c, d, a1)) -> b;
+// Automatically generated. Retrieves the `thd` constructor field of the `:(,,,,)` type.
+fun thd .2 : forall<a,b,c,d,a1> ((a, b, c, d, a1)) -> c;
+// Automatically generated. Retrieves the `field4` constructor field of the `:(,,,,)` type.
+fun field4 .1 : forall<a,b,c,d,a1> ((a, b, c, d, a1)) -> d;
+// Automatically generated. Retrieves the `field5` constructor field of the `:(,,,,)` type.
+fun field5 : forall<a,b,c,d,a1> ((a, b, c, d, a1)) -> a1;
+fun (.copy) .4 : forall<a,b,c,d,a1> ((a, b, c, d, a1), fst : ?a, snd : ?b, thd : ?c, field4 : ?d, field5 : ?a1) -> (a, b, c, d, a1);
+// Automatically generated. Tests for the `False` constructor of the `:bool` type.
+fun false? : (bool : bool) -> bool;
+// Automatically generated. Tests for the `True` constructor of the `:bool` type.
+fun true? : (bool : bool) -> bool;
+// Automatically generated. Tests for the `Left` constructor of the `:either` type.
+fun left? : forall<a,b> (either : (either :: (V, V) -> V)<a,b>) -> bool;
+// Automatically generated. Tests for the `Right` constructor of the `:either` type.
+fun right? : forall<a,b> (either : (either :: (V, V) -> V)<a,b>) -> bool;
+// Automatically generated. Retrieves the `dref` constructor field of the `:delayed` type.
+// Automatically generated. Tests for the `Error` constructor of the `:exception-info` type.
+fun error? : (exception-info : exception-info) -> bool;
+// Automatically generated. Tests for the `Assert` constructor of the `:exception-info` type.
+fun assert? : (exception-info : exception-info) -> bool;
+// Automatically generated. Tests for the `Todo` constructor of the `:exception-info` type.
+fun todo? : (exception-info : exception-info) -> bool;
+// Automatically generated. Tests for the `Range` constructor of the `:exception-info` type.
+fun range? : (exception-info : exception-info) -> bool;
+// Automatically generated. Tests for the `Finalize` constructor of the `:exception-info` type.
+fun finalize? : (exception-info : exception-info) -> bool;
+// Automatically generated. Tests for the `Pattern` constructor of the `:exception-info` type.
+fun pattern? : (exception-info : exception-info) -> bool;
+// Automatically generated. Tests for the `System` constructor of the `:exception-info` type.
+fun system? : (exception-info : exception-info) -> bool;
+// Automatically generated. Tests for the `Internal` constructor of the `:exception-info` type.
+fun internal? : (exception-info : exception-info) -> bool;
+val (.tag-Error) : string;
+val (.tag-Assert) : string;
+val (.tag-Todo) : string;
+val (.tag-Range) : string;
+val (.tag-Finalize) : string;
+val (.tag-Pattern) : string;
+val (.tag-System) : string;
+val (.tag-Internal) : string;
+// Automatically generated. Tests for the `Nil` constructor of the `:list` type.
+fun nil? : forall<a> (list : (list :: V -> V)<a>) -> bool;
+// Automatically generated. Tests for the `Cons` constructor of the `:list` type.
+fun cons? : forall<a> (list : (list :: V -> V)<a>) -> bool;
+// Automatically generated. Tests for the `Nothing` constructor of the `:maybe` type.
+fun nothing? : forall<a> (maybe : (maybe :: V -> V)<a>) -> bool;
+// Automatically generated. Tests for the `Just` constructor of the `:maybe` type.
+fun just? : forall<a> (maybe : (maybe :: V -> V)<a>) -> bool;
+// Automatically generated. Tests for the `Optional` constructor of the `:optional` type.
+fun optional? : forall<a> (optional : ?a) -> bool;
+// Automatically generated. Tests for the `None` constructor of the `:optional` type.
+fun none? : forall<a> (optional : ?a) -> bool;
+// Automatically generated. Tests for the `Lt` constructor of the `:order` type.
+fun lt? : (order : order) -> bool;
+// Automatically generated. Tests for the `Eq` constructor of the `:order` type.
+fun eq? : (order : order) -> bool;
+// Automatically generated. Tests for the `Gt` constructor of the `:order` type.
+fun gt? : (order : order) -> bool;
+// Automatically generated. Retrieves the `str` constructor field of the `:sslice` type.
+// Automatically generated. Retrieves the `start` constructor field of the `:sslice` type.
+// Automatically generated. Retrieves the `len` constructor field of the `:sslice` type.
+// Automatically generated. Retrieves the `head` constructor field of the `:stream` type.
+fun head : forall<a> (stream : (stream :: V -> V)<a>) -> a;
+// Automatically generated. Retrieves the `tail` constructor field of the `:stream` type.
+fun tail : forall<a> (stream : (stream :: V -> V)<a>) -> (stream :: V -> V)<a>;
+fun (.copy) .7 : forall<a> ((stream :: V -> V)<a>, head : ?a, tail : ?(stream :: V -> V)<a>) -> (stream :: V -> V)<a>;
+// Automatically generated. Tests for the `Cancel` constructor of the `:exception-info` type.
+fun (.makeFreshResourceHandler0) : forall<a,b,c,(e :: E),(e1 :: E)> (effect-name : string, reinit : (null :: V -> V)<() -> (e :: E) ()>, ret : (null :: V -> V)<(a) -> (e :: E) b>, final : (null :: V -> V)<() -> (e :: E) ()>, branches : (vector :: V -> V)<(handler-branch0 :: (E, V) -> V)<(e :: E),b>>, handler-kind : int, resource-tag : int, resource-wrap : (int) -> c) -> (total :: E) ((action : (c) -> (e1 :: E) a) -> (e :: E) b);
+fun (.makeFreshResourceHandler1) : forall<a,b,c,(e :: E),d,(e1 :: E)> (effect-name : string, reinit : (null :: V -> V)<(local : d) -> (e :: E) d>, ret : (null :: V -> V)<(result : a, local : d) -> (e :: E) b>, final : (null :: V -> V)<(local : d) -> (e :: E) ()>, branches : (vector :: V -> V)<(handler-branch1 :: (E, V, V) -> V)<(e :: E),d,b>>, handler-kind : int, resource-tag : int, resource-wrap : (int) -> c) -> (total :: E) ((initial-local : d, action : (c) -> (e1 :: E) a) -> (e :: E) b);
+fun (.makeHandler0) : forall<a,b,(e :: E),(e1 :: E)> (effect-name : string, reinit : (null :: V -> V)<() -> (e :: E) ()>, ret : (null :: V -> V)<(a) -> (e :: E) b>, final : (null :: V -> V)<() -> (e :: E) ()>, branches : (vector :: V -> V)<(handler-branch0 :: (E, V) -> V)<(e :: E),b>>, handler-kind : int) -> (total :: E) ((action : () -> (e1 :: E) a) -> (e :: E) b);
+fun (.makeHandler1) : forall<a,b,(e :: E),c,(e1 :: E)> (effect-name : string, reinit : (null :: V -> V)<(local : c) -> (e :: E) c>, ret : (null :: V -> V)<(result : a, local : c) -> (e :: E) b>, final : (null :: V -> V)<(local : c) -> (e :: E) ()>, branches : (vector :: V -> V)<(handler-branch1 :: (E, V, V) -> V)<(e :: E),c,b>>, handler-kind : int) -> (total :: E) ((initial-local : c, action : () -> (e1 :: E) a) -> (e :: E) b);
+fun (.makeHandlerBranch0) : forall<a,b,c,(e :: E)> (resume-kind : int, op-name : string, branch : ((resume-context :: (V, E, V) -> V)<a,(e :: E),b>, op : c) -> (e :: E) b) -> (total :: E) (handler-branch0 :: (E, V) -> V)<(e :: E),b>;
+fun (.makeHandlerBranch0-x1) : forall<a,(e :: E)> (resume-kind : int, op-name : string, branch : any) -> (total :: E) (handler-branch0 :: (E, V) -> V)<(e :: E),a>;
+fun (.makeHandlerBranch1) : forall<a,b,c,(e :: E),d> (resume-kind : int, op-name : string, branch : ((resume-context1 :: (V, E, V, V) -> V)<a,(e :: E),b,d>, op : c, local : d) -> (e :: E) b) -> (total :: E) (handler-branch1 :: (E, V, V) -> V)<(e :: E),d,b>;
+fun (.makeHandlerBranch1-x1) : forall<a,(e :: E),b> (resume-kind : int, op-name : string, branch : any) -> (total :: E) (handler-branch1 :: (E, V, V) -> V)<(e :: E),b,a>;
+// Used for handlers with just a `return` branch
+fun (.makeHandlerRet0) : forall<a,b,(e :: E)> (ignored-effect-name : string, reinit : (null :: V -> V)<() -> (e :: E) ()>, ret : (null :: V -> V)<(result : a) -> (e :: E) b>, final : (null :: V -> V)<() -> (e :: E) ()>, ignored-branches : int, ignored-kind : int) -> (total :: E) ((action : () -> (e :: E) a) -> (e :: E) b);
+// Used for handlers with just a `return` branch
+fun (.makeHandlerRet1) : forall<a,b,(e :: E),c> (ignored-effect-name : string, reinit : (null :: V -> V)<(local : c) -> (e :: E) c>, ret : (null :: V -> V)<(result : a, local : c) -> (e :: E) b>, final : (null :: V -> V)<(local : c) -> (e :: E) ()>, ignored-branches : int, ignored-kind : int) -> (total :: E) ((local : c, action : () -> (e :: E) a) -> (e :: E) b);
+fun (.makeResourceHandler0) : forall<a,b,(e :: E),(e1 :: E)> (effect-name : string, reinit : (null :: V -> V)<() -> (e :: E) ()>, ret : (null :: V -> V)<(a) -> (e :: E) b>, final : (null :: V -> V)<() -> (e :: E) ()>, branches : (vector :: V -> V)<(handler-branch0 :: (E, V) -> V)<(e :: E),b>>, handler-kind : int, resource-tag : int) -> (total :: E) ((action : () -> (e1 :: E) a) -> (e :: E) b);
+fun (.makeResourceHandler1) : forall<a,b,(e :: E),c,(e1 :: E)> (effect-name : string, reinit : (null :: V -> V)<(local : c) -> (e :: E) c>, ret : (null :: V -> V)<(result : a, local : c) -> (e :: E) b>, final : (null :: V -> V)<(local : c) -> (e :: E) ()>, branches : (vector :: V -> V)<(handler-branch1 :: (E, V, V) -> V)<(e :: E),c,b>>, handler-kind : int, resource-tag : int) -> (total :: E) ((initial-local : c, action : () -> (e1 :: E) a) -> (e :: E) b);
+// Internal export for the regex module
+fun (.new-sslice) : (str : string, start : int32, len : int32) -> sslice;
+// Unsafe: transform any type to a `null` type; used internally by the compiler.
+fun (.null-any) : forall<a> (x : a) -> (null :: V -> V)<a>;
+fun (.yieldop) : forall<a,b> (effect-name : string, op-name : string, op-resource : int, op-idx : int, op : a) -> (yld :: V -> V)<b>;
+fun (.yieldop-x1) : forall<a,b,c> (effect-name : string, op-name : string, op-resource : int, op-idx : int, op : a, def : (maybe :: V -> V)<c>) -> (yld :: V -> V)<b>;
+// Efficiently reverse a list `xs` and append it to `tl`:\
+// `reverse-append(xs,tl) == reserve(xs) + tl
+fun reverse-append : forall<a> (xs : (list :: V -> V)<a>, tl : (list :: V -> V)<a>) -> (list :: V -> V)<a>;
+// Raise an integer `i` to the power of `exp`.
+fun pow : (i : int, exp : int) -> int;
+// Compose two funs `f` and `g`.
+fun o : forall<a,b,c,(e :: E)> (f : (a) -> (e :: E) b, g : (c) -> (e :: E) a) -> ((x : c) -> (e :: E) b);
+// The identity function returns its argument unchanged.
+fun id : forall<a> (x : a) -> a;
+// Convert a vector to a list with an optional tail.
+fun vlist : forall<a> (v : (vector :: V -> V)<a>, tail : ?(list :: V -> V)<a>) -> (list :: V -> V)<a>;
+// Convert a character to a string
+fun string : (c : char) -> string;
+// Convert a vector of characters to a string.
+fun string .1 : ((vector :: V -> V)<char>) -> string;
+// Convert a list of characters to a string
+fun string .2 : (cs : (list :: V -> V)<char>) -> (total :: E) string;
+// O(n). Copy the `slice` argument into a fresh string.
+// Takes O(1) time if the slice covers the entire string.
+fun string .3 : (slice : sslice) -> string;
+// Convert a `:maybe` string to a string using the empty sting for `Nothing`
+fun string .4 : (ms : (maybe :: V -> V)<string>) -> string;
+// O(`count`). Advance the start position of a string slice by `count` characters
+// up to the end of the string.
+// A negative `count` advances the start position backwards upto the first position
+// in a string.
+// Maintains the character count of the original slice upto the end of the string.
+// For example:
+//
+// * `"abc".first.advance(1).string == "b"`,
+// * `"abc".first.advance(3).string == ""`,
+// * `"abc".last.advance(-1).string == "b"`.
+//
+fun advance : (slice : sslice, count : int) -> sslice;
+// Apply a function `f` to a specified argument `x`.
+fun* (.bind-apply) : forall<a,b,(e :: E)> (f : (a) -> (e :: E) b, x : a) -> (e :: E) b;
+// Apply a function `f` to a specified argument `x`.
+fun (.fast-apply) : forall<a,b,(e :: E)> (f : (a) -> (e :: E) b, x : a) -> (e :: E) b;
+// Apply a function `f` to a specified argument `x`.
+fun** apply : forall<a,b,(e :: E)> (f : (a) -> (e :: E) b, x : a) -> (e :: E) b;
+fun exception : (message : string, info : exception-info) -> exception;
+// _Unsafe_. This function calls a function and pretends it did not have any effect at all.
+fun unsafe-total : forall<a,(e :: E)> (action : () -> (e :: E) a) -> (total :: E) a;
+// O(1). Return the string slice from the start of a string up to the
+// start of `slice` argument.
+fun before : (slice : sslice) -> sslice;
+fun info : (exn : exception) -> exception-info;
+// O(`count`). Extend a string slice by `count` characters up to the end of the string.
+// A negative `count` shrinks the slice up to the empty slice.
+// For example:
+//
+// * `"abc".first.extend(1).string == "ab"`
+// * `"abc".last.extend(-1).string == ""`
+//
+fun extend : (slice : sslice, count : int) -> sslice;
+// Convert a string to upper-case
+fun to-upper : (s : string) -> string;
+fun cdiv-exp10 : (i : int, n : int) -> int;
+fun mul-exp10 : (i : int, n : int) -> int;
+// Return a random number equal or larger than 0.0 and smaller than 1.0
+fun random : () -> <(ndet :: X)> double;
+// Return the common prefix of two strings (upto `upto` characters (default is minimum length of the two strings))
+fun common-prefix : (s : string, t : string, upto : ?int) -> sslice;
+// The `const` funs returns its first argument and ignores the second.
+fun const : forall<a,b> (x : a, y : b) -> a;
+// Return a 'constant' function that ignores its argument and always returns the same result
+fun const .1 : forall<a,b> (default : a) -> (total :: E) ((x : b) -> a);
+// If the slice is not empty,
+// return the first character, and a new slice that is advanced by 1.
+fun next : (slice : sslice) -> (maybe :: V -> V)<(char, sslice)>;
+// Return the number of decimal digits of `i`. Return `0` when `i==0`.
+fun count-digits : (i : int) -> int;
+// Convert a `:maybe<a>` value to `:a`, using the `nothing` parameter for `Nothing`.
+fun default : forall<a> (m : (maybe :: V -> V)<a>, nothing : a) -> a;
+// An empty slice
+val empty : sslice;
+// Is this an even integer?
+fun even? : (i : int) -> bool;
+// Return the number of ending `0` digits of `i`. Return `0` when `i==0`.
+fun exp10? : (i : int) -> int;
+fun* (.bind-finalize) : forall<a,b,c,(e :: E)> (context : (resume-context :: (V, E, V) -> V)<a,(e :: E),b>, result : c) -> (e :: E) c;
+fun (.fast-finalize) : forall<a,b,c,(e :: E)> (context : (resume-context :: (V, E, V) -> V)<a,(e :: E),b>, result : c) -> (e :: E) c;
+fun** finalize : forall<a,b,c,(e :: E)> (context : (resume-context :: (V, E, V) -> V)<a,(e :: E),b>, result : c) -> (e :: E) c;
+fun* (.bind-finalize) .1 : forall<a,b,c,(e :: E),d> (context : (resume-context1 :: (V, E, V, V) -> V)<a,(e :: E),b,d>, result : c) -> (e :: E) c;
+fun (.fast-finalize) .1 : forall<a,b,c,(e :: E),d> (context : (resume-context1 :: (V, E, V, V) -> V)<a,(e :: E),b,d>, result : c) -> (e :: E) c;
+fun** finalize .1 : forall<a,b,c,(e :: E),d> (context : (resume-context1 :: (V, E, V, V) -> V)<a,(e :: E),b,d>, result : c) -> (e :: E) c;
+// Execute a `hndler` no matter what exception was raised in `action`.
+fun* (.bind-finally) : forall<(e :: E),a> (action : () -> (e :: E) a, hndl : () -> (e :: E) ()) -> (e :: E) a;
+// Execute a `hndler` no matter what exception was raised in `action`.
+fun (.fast-finally) : forall<(e :: E),a> (action : () -> (e :: E) a, hndl : () -> (e :: E) ()) -> (e :: E) a;
+// Execute a `hndler` no matter what exception was raised in `action`.
+fun** finally : forall<(e :: E),a> (action : () -> (e :: E) a, hndl : () -> (e :: E) ()) -> (e :: E) a;
+// Generic show: shows the internal representation of an object as a string
+// Note: this breaks parametricity so it should not be public
+// Print a string to the console
+fun stack-trace : (exn : exception) -> string;
+// Print a string to the console, including a final newline character.
+// Return the host environment: `dotnet`, `browser`, `webworker`, or `node`.
+fun host : () -> <(ndet :: X)> string;
+// The `ignore` function ignores its argument.
+fun ignore : forall<a> (x : a) -> ();
+fun* (.bind-inject-exn) : forall<a,(e :: E)> (action : () -> (e :: E) a) -> <(exn :: X)|(e :: E)> a;
+fun (.fast-inject-exn) : forall<a,(e :: E)> (action : () -> (e :: E) a) -> <(exn :: X)|(e :: E)> a;
+fun** inject-exn : forall<a,(e :: E)> (action : () -> (e :: E) a) -> <(exn :: X)|(e :: E)> a;
+// Insert a separator `sep`  between all elements of a list `xs` .
+fun intersperse : forall<a> (xs : (list :: V -> V)<a>, sep : a) -> (list :: V -> V)<a>;
+// Used by the compiler to wrap main console applications
+fun* (.bind-main-console) : forall<a,(e :: E)> (main : () -> (e :: E) a) -> (e :: E) a;
+// Used by the compiler to wrap main console applications
+fun (.fast-main-console) : forall<a,(e :: E)> (main : () -> (e :: E) a) -> (e :: E) a;
+// Used by the compiler to wrap main console applications
+fun** main-console : forall<a,(e :: E)> (main : () -> (e :: E) a) -> (e :: E) a;
+fun mbint : (m : (maybe :: V -> V)<int>) -> int;
+// Return the message associated with an exception
+fun message : (exn : exception) -> string;
+fun negate : (i : int) -> int;
+// Return a positive random integer (including 0)
+fun random-int : () -> <(ndet :: X)> int;
+fun* (.bind-resume) : forall<a,b,(e :: E)> (context : (resume-context :: (V, E, V) -> V)<a,(e :: E),b>, result : a) -> (e :: E) b;
+fun (.fast-resume) : forall<a,b,(e :: E)> (context : (resume-context :: (V, E, V) -> V)<a,(e :: E),b>, result : a) -> (e :: E) b;
+fun** resume : forall<a,b,(e :: E)> (context : (resume-context :: (V, E, V) -> V)<a,(e :: E),b>, result : a) -> (e :: E) b;
+fun* (.bind-resume) .1 : forall<a,b,(e :: E),c> (context : (resume-context1 :: (V, E, V, V) -> V)<a,(e :: E),b,c>, result : a, local : c) -> (e :: E) b;
+fun (.fast-resume) .1 : forall<a,b,(e :: E),c> (context : (resume-context1 :: (V, E, V, V) -> V)<a,(e :: E),b,c>, result : a, local : c) -> (e :: E) b;
+fun** resume .1 : forall<a,b,(e :: E),c> (context : (resume-context1 :: (V, E, V, V) -> V)<a,(e :: E),b,c>, result : a, local : c) -> (e :: E) b;
+// Returns a singleton list.
+fun single : forall<a> (x : a) -> (list :: V -> V)<a>;
+// Convert a string to lower-case
+fun to-lower : (s : string) -> string;
+// Get the value of the `Just` constructor or raise an exception
+fun unjust : forall<a> (m : (maybe :: V -> V)<a>) -> <(exn :: X)> a;
+// Create a new vector of length `n`  with initial elements given by function `f` .
+// Substract two character codePoints
+fun (-) .3 : (c : char, d : char) -> (total :: E) char;
+fun int .3 : (b : bool) -> int;
+fun int .4 : (x : order) -> int;
+fun (==) .4 : (x : order, y : order) -> bool;
+fun (==) .5 : (x : bool, y : bool) -> bool;
+fun (<) .4 : (x : order, y : order) -> bool;
+fun (<) .5 : (x : bool, y : bool) -> bool;
+fun order : (i : int) -> order;
+// Compare two strings.
+// Uses the character codes directly for comparison
+fun compare .4 : (x : string, y : string) -> order;
+fun (<) .6 : (x : string, y : string) -> bool;
+fun (>) .3 : (x : order, y : order) -> bool;
+fun (>) .4 : (x : bool, y : bool) -> bool;
+fun (>) .5 : (x : string, y : string) -> bool;
+fun compare .1 : (x : char, y : char) -> order;
+fun compare .2 : (x : bool, y : bool) -> order;
+fun compare .3 : (x : double, y : double) -> order;
+// Reverse a list.
+fun reverse : forall<a> (xs : (list :: V -> V)<a>) -> (list :: V -> V)<a>;
+// Append two lists.
+fun (+) .4 : forall<a> (xs : (list :: V -> V)<a>, ys : (list :: V -> V)<a>) -> (list :: V -> V)<a>;
+// Add two character code points
+fun (+) .5 : (c : char, d : char) -> (total :: E) char;
+// Raise an integer `i` to the power of `exp`.
+fun (^) .1 : (i : int, exp : int) -> int;
+fun (!=) .4 : (x : order, y : order) -> bool;
+fun (!=) .5 : (x : bool, y : bool) -> bool;
+fun (<=) .4 : (x : order, y : order) -> bool;
+fun (<=) .5 : (x : bool, y : bool) -> bool;
+fun (<=) .6 : (x : string, y : string) -> bool;
+fun (>=) .3 : (x : order, y : order) -> bool;
+fun (>=) .4 : (x : bool, y : bool) -> bool;
+fun (>=) .5 : (x : string, y : string) -> bool;
+// Get (zero-based) element `n`  of a list. Return a `:maybe` type.
+fun [] .1 : forall<a> (xs : (list :: V -> V)<a>, n : int) -> (maybe :: V -> V)<a>;
+fun sign .1 : (d : double) -> order;
+// Is the integer positive (stricly greater than zero)
+fun pos? .1 : (i : int) -> bool;
+// Is the value positive?
+fun pos? .2 : (d : double) -> bool;
+// Is a slice empty?
+fun empty? : (slice : sslice) -> bool;
+// Is a string empty?
+fun empty? .1 : (s : string) -> bool;
+fun (||) .1 : forall<a> (m1 : (maybe :: V -> V)<a>, m2 : (maybe :: V -> V)<a>) -> (maybe :: V -> V)<a>;
+// Choose a non-empty string
+fun (||) .2 : (x : string, y : string) -> string;
+// Return the element at position `index` in vector `v`, or `Nothing` if out of bounds
+fun at : forall<a> (v : (vector :: V -> V)<a>, index : int) -> (maybe :: V -> V)<a>;
+// Do all elements satisfy a predicate ?
+fun* (.bind-all) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) bool;
+// Do all elements satisfy a predicate ?
+fun (.fast-all) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) bool;
+// Do all elements satisfy a predicate ?
+fun** all : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) bool;
+// Are there any elements in a list that satisfy a predicate ?
+fun* (.bind-any) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) bool;
+// Are there any elements in a list that satisfy a predicate ?
+fun (.fast-any) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) bool;
+// Are there any elements in a list that satisfy a predicate ?
+fun** any : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) bool;
+fun dec : (i : int) -> int;
+fun inc : (i : int) -> int;
+// Executes `action`  for each integer between `start`  upto `end`  (including both `start`  and `end` ).
+// If `start > end`  the function returns without any call to `action` .
+fun* (.bind-for) : forall<(e :: E)> (start : int, end : int, action : (int) -> (e :: E) ()) -> (e :: E) ();
+// Executes `action`  for each integer between `start`  upto `end`  (including both `start`  and `end` ).
+// If `start > end`  the function returns without any call to `action` .
+fun (.fast-for) : forall<(e :: E)> (start : int, end : int, action : (int) -> (e :: E) ()) -> (e :: E) ();
+// Executes `action`  for each integer between `start`  upto `end`  (including both `start`  and `end` ).
+// If `start > end`  the function returns without any call to `action` .
+fun** for : forall<(e :: E)> (start : int, end : int, action : (int) -> (e :: E) ()) -> (e :: E) ();
+// Executes `action`  for each integer between `start`  upto `end`  (including both `start`  and `end` ).
+// If `start > end`  the function returns without any call to `action` .
+// Executes `action`  for each integer between `start`  upto `end`  (including both `start`  and `end` ).
+// If `start > end`  the function returns without any call to `action` .
+// Executes `action`  for each integer between `start`  upto `end`  (including both `start`  and `end` ).
+// If `start > end`  the function returns without any call to `action` .
+// Returns the length of a list.
+fun length .1 : forall<a> (xs : (list :: V -> V)<a>) -> int;
+// Return the length of a vector.
+fun length .2 : forall<a> (v : (vector :: V -> V)<a>) -> int;
+// recurse using an accumulator using constant heap space
+// recurse using an accumulator using constant heap space
+// recurse using an accumulator using constant heap space
+// Apply a function `f`  to each element of the input list in sequence where takes
+// both the index of the current element, the element itself, and the tail list as arguments.
+fun* (.bind-map-indexed-peek) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (idx : int, value : a, rest : (list :: V -> V)<a>) -> (e :: E) b) -> (e :: E) (list :: V -> V)<b>;
+// Apply a function `f`  to each element of the input list in sequence where takes
+// both the index of the current element, the element itself, and the tail list as arguments.
+fun (.fast-map-indexed-peek) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (idx : int, value : a, rest : (list :: V -> V)<a>) -> (e :: E) b) -> (e :: E) (list :: V -> V)<b>;
+// Apply a function `f`  to each element of the input list in sequence where takes
+// both the index of the current element, the element itself, and the tail list as arguments.
+fun** map-indexed-peek : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (idx : int, value : a, rest : (list :: V -> V)<a>) -> (e :: E) b) -> (e :: E) (list :: V -> V)<b>;
+fun* (.bind-map) : forall<a,b,(e :: E)> (m : (maybe :: V -> V)<a>, f : (a) -> (e :: E) b) -> (e :: E) (maybe :: V -> V)<b>;
+fun (.fast-map) : forall<a,b,(e :: E)> (m : (maybe :: V -> V)<a>, f : (a) -> (e :: E) b) -> (e :: E) (maybe :: V -> V)<b>;
+fun** map : forall<a,b,(e :: E)> (m : (maybe :: V -> V)<a>, f : (a) -> (e :: E) b) -> (e :: E) (maybe :: V -> V)<b>;
+// Returns an integer list of increasing elements from `lo`  to `hi`
+// (including both `lo`  and `hi` ).
+// If `lo > hi`  the function returns the empty list.
+fun list : (lo : int, hi : int) -> (total :: E) (list :: V -> V)<int>;
+// Applies a function `f` to list of increasing elements from `lo`  to `hi`
+// (including both `lo`  and `hi` ).
+// If `lo > hi`  the function returns the empty list.
+fun* (.bind-list) .1 : forall<a,(e :: E)> (lo : int, hi : int, f : (int) -> (e :: E) a) -> (e :: E) (list :: V -> V)<a>;
+// Applies a function `f` to list of increasing elements from `lo`  to `hi`
+// (including both `lo`  and `hi` ).
+// If `lo > hi`  the function returns the empty list.
+fun (.fast-list) .1 : forall<a,(e :: E)> (lo : int, hi : int, f : (int) -> (e :: E) a) -> (e :: E) (list :: V -> V)<a>;
+// Applies a function `f` to list of increasing elements from `lo`  to `hi`
+// (including both `lo`  and `hi` ).
+// If `lo > hi`  the function returns the empty list.
+fun** list .1 : forall<a,(e :: E)> (lo : int, hi : int, f : (int) -> (e :: E) a) -> (e :: E) (list :: V -> V)<a>;
+// Apply a function `f`  to each element of the input list in sequence.
+fun* (.bind-map) .5 : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (a) -> (e :: E) b) -> (e :: E) (list :: V -> V)<b>;
+// Apply a function `f`  to each element of the input list in sequence.
+fun (.fast-map) .5 : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (a) -> (e :: E) b) -> (e :: E) (list :: V -> V)<b>;
+// Apply a function `f`  to each element of the input list in sequence.
+fun** map .5 : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (a) -> (e :: E) b) -> (e :: E) (list :: V -> V)<b>;
+// Create a list of characters from `lo`  to `hi`  (inclusive).
+fun list .2 : (lo : char, hi : char) -> (total :: E) (list :: V -> V)<char>;
+// Convert a `:maybe` type to a list type.
+fun list .3 : forall<a> (m : (maybe :: V -> V)<a>) -> (list :: V -> V)<a>;
+// Convert a string to a list of characters
+fun list .4 : (s : string) -> (total :: E) (list :: V -> V)<char>;
+// Convert a vector to a list.
+fun list .5 : forall<a> (v : (vector :: V -> V)<a>) -> (list :: V -> V)<a>;
+// Map over the `Right` component of an `:either` type.
+fun* (.bind-map) .1 : forall<a,b,c,(e :: E)> (e : (either :: (V, V) -> V)<a,b>, f : (b) -> (e :: E) c) -> (e :: E) (either :: (V, V) -> V)<a,c>;
+// Map over the `Right` component of an `:either` type.
+fun (.fast-map) .1 : forall<a,b,c,(e :: E)> (e : (either :: (V, V) -> V)<a,b>, f : (b) -> (e :: E) c) -> (e :: E) (either :: (V, V) -> V)<a,c>;
+// Map over the `Right` component of an `:either` type.
+fun** map .1 : forall<a,b,c,(e :: E)> (e : (either :: (V, V) -> V)<a,b>, f : (b) -> (e :: E) c) -> (e :: E) (either :: (V, V) -> V)<a,c>;
+fun* (.bind-map) .2 : forall<a,b,(e :: E)> (t : (a, a), f : (a) -> (e :: E) b) -> (e :: E) (b, b);
+fun (.fast-map) .2 : forall<a,b,(e :: E)> (t : (a, a), f : (a) -> (e :: E) b) -> (e :: E) (b, b);
+fun** map .2 : forall<a,b,(e :: E)> (t : (a, a), f : (a) -> (e :: E) b) -> (e :: E) (b, b);
+fun* (.bind-map) .3 : forall<a,b,(e :: E)> (t : (a, a, a), f : (a) -> (e :: E) b) -> (e :: E) (b, b, b);
+fun (.fast-map) .3 : forall<a,b,(e :: E)> (t : (a, a, a), f : (a) -> (e :: E) b) -> (e :: E) (b, b, b);
+fun** map .3 : forall<a,b,(e :: E)> (t : (a, a, a), f : (a) -> (e :: E) b) -> (e :: E) (b, b, b);
+fun* (.bind-map) .4 : forall<a,b,(e :: E)> (t : (a, a, a, a), f : (a) -> (e :: E) b) -> (e :: E) (b, b, b, b);
+fun (.fast-map) .4 : forall<a,b,(e :: E)> (t : (a, a, a, a), f : (a) -> (e :: E) b) -> (e :: E) (b, b, b, b);
+fun** map .4 : forall<a,b,(e :: E)> (t : (a, a, a, a), f : (a) -> (e :: E) b) -> (e :: E) (b, b, b, b);
+// Apply a function `f` to each character in a string
+fun* (.bind-map) .6 : forall<(e :: E)> (s : string, f : (char) -> (e :: E) char) -> (e :: E) string;
+// Apply a function `f` to each character in a string
+fun (.fast-map) .6 : forall<(e :: E)> (s : string, f : (char) -> (e :: E) char) -> (e :: E) string;
+// Apply a function `f` to each character in a string
+fun** map .6 : forall<(e :: E)> (s : string, f : (char) -> (e :: E) char) -> (e :: E) string;
+// Apply a total function `f` to each element in a vector `v`
+fun* (.bind-map) .7 : forall<a,b,(e :: E)> (v : (vector :: V -> V)<a>, f : (a) -> (e :: E) b) -> (e :: E) (vector :: V -> V)<b>;
+// Apply a total function `f` to each element in a vector `v`
+fun (.fast-map) .7 : forall<a,b,(e :: E)> (v : (vector :: V -> V)<a>, f : (a) -> (e :: E) b) -> (e :: E) (vector :: V -> V)<b>;
+// Apply a total function `f` to each element in a vector `v`
+fun** map .7 : forall<a,b,(e :: E)> (v : (vector :: V -> V)<a>, f : (a) -> (e :: E) b) -> (e :: E) (vector :: V -> V)<b>;
+// Return the maximum of two integers
+fun max : (i : int, j : int) -> int;
+// Returns the largest of two doubles
+fun max .1 : (x : double, y : double) -> double;
+// Return the minimum of two integers
+fun min : (i : int, j : int) -> int;
+// Returns the smallest of two doubles
+fun min .1 : (x : double, y : double) -> double;
+// Fold a list from the left, i.e. `foldl([1,2],0,(+)) == (0+1)+2`
+// Since `foldl` is tail recursive, it is preferred over `foldr` when using an associative function `f`
+fun* (.bind-foldl) : forall<a,b,(e :: E)> ((list :: V -> V)<a>, b, (b, a) -> (e :: E) b) -> (e :: E) b;
+// Fold a list from the left, i.e. `foldl([1,2],0,(+)) == (0+1)+2`
+// Since `foldl` is tail recursive, it is preferred over `foldr` when using an associative function `f`
+fun (.fast-foldl) : forall<a,b,(e :: E)> ((list :: V -> V)<a>, b, (b, a) -> (e :: E) b) -> (e :: E) b;
+// Fold a list from the left, i.e. `foldl([1,2],0,(+)) == (0+1)+2`
+// Since `foldl` is tail recursive, it is preferred over `foldr` when using an associative function `f`
+fun** foldl : forall<a,b,(e :: E)> ((list :: V -> V)<a>, b, (b, a) -> (e :: E) b) -> (e :: E) b;
+// Return the sum of a list of integers
+fun sum : (xs : (list :: V -> V)<int>) -> int;
+// Catch any exception raised in `action` and handle it.
+// Use `on-exn` or `on-exit` when appropiate.
+fun* (.bind-try) : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a, hndl : (exception) -> (e :: E) a) -> (e :: E) a;
+// Catch any exception raised in `action` and handle it.
+// Use `on-exn` or `on-exit` when appropiate.
+fun (.fast-try) : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a, hndl : (exception) -> (e :: E) a) -> (e :: E) a;
+// Catch any exception raised in `action` and handle it.
+// Use `on-exn` or `on-exit` when appropiate.
+fun** try : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a, hndl : (exception) -> (e :: E) a) -> (e :: E) a;
+// Transform an exception effect to a `:try` type.
+fun* (.bind-try) .1 : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a) -> (e :: E) (try :: V -> V)<a>;
+// Transform an exception effect to a `:try` type.
+fun (.fast-try) .1 : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a) -> (e :: E) (try :: V -> V)<a>;
+// Transform an exception effect to a `:try` type.
+fun** try .1 : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a) -> (e :: E) (try :: V -> V)<a>;
+// Zip two lists together by apply a function `f` to all corresponding elements
+// and their index in the list.
+// The returned list is only as long as the smallest input list.
+fun* (.bind-zipwith-indexed) : forall<a,b,c,(e :: E)> (xs : (list :: V -> V)<a>, ys : (list :: V -> V)<b>, f : (int, a, b) -> (e :: E) c) -> (e :: E) (list :: V -> V)<c>;
+// Zip two lists together by apply a function `f` to all corresponding elements
+// and their index in the list.
+// The returned list is only as long as the smallest input list.
+fun (.fast-zipwith-indexed) : forall<a,b,c,(e :: E)> (xs : (list :: V -> V)<a>, ys : (list :: V -> V)<b>, f : (int, a, b) -> (e :: E) c) -> (e :: E) (list :: V -> V)<c>;
+// Zip two lists together by apply a function `f` to all corresponding elements
+// and their index in the list.
+// The returned list is only as long as the smallest input list.
+fun** zipwith-indexed : forall<a,b,c,(e :: E)> (xs : (list :: V -> V)<a>, ys : (list :: V -> V)<b>, f : (int, a, b) -> (e :: E) c) -> (e :: E) (list :: V -> V)<c>;
+// Zip two lists together by pairing the corresponding elements.
+// The returned list is only as long as the smallest input list.
+fun zip : forall<a,b> (xs : (list :: V -> V)<a>, ys : (list :: V -> V)<b>) -> (list :: V -> V)<(a, b)>;
+// O(1). Return the string slice from the end of `slice` argument
+// to the end of the string.
+fun after : (slice : sslice) -> sslice;
+// Is the character a lower-case ASCII character ?
+fun lower? : (c : char) -> bool;
+// Is the character an upper-case ASCII character ?
+fun upper? : (c : char) -> bool;
+// Is the character an ASCII letter ?
+fun alpha? : (c : char) -> bool;
+// Is the character an ASCII digit ?
+fun digit? : (c : char) -> bool;
+// Is the character ASCII letter or digit?
+fun alpha-num? : (c : char) -> bool;
+// Is the character an ASCII character, e.g. `c <= '\x7F'`  ?
+fun ascii? : (c : char) -> bool;
+fun throw : forall<a> (exn : exception) -> <(exn :: X)> a;
+// Throw an exception
+fun throw .1 : forall<a> (message : string, err : ?exception-info) -> <(exn :: X)> a;
+// Raise an exception with a specified message.
+fun error : forall<a> (message : string) -> <(exn :: X)> a;
+// _Unsafe_. This function removes the exception effect (`:exn`) from the effect of an action
+fun* (.bind-unsafe-noexn) : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a) -> (e :: E) a;
+// _Unsafe_. This function removes the exception effect (`:exn`) from the effect of an action
+fun (.fast-unsafe-noexn) : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a) -> (e :: E) a;
+// _Unsafe_. This function removes the exception effect (`:exn`) from the effect of an action
+fun** unsafe-noexn : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a) -> (e :: E) a;
+fun assert : (message : string, condition : bool) -> ();
+// Convert an int to a boolean, using `False` for 0 and `True` otherwise.
+fun bool : (i : int) -> bool;
+// Convert a `:maybe` type to a boolean using `False` for `Nothing` and `True` for `Just`.
+fun bool .1 : forall<a> (m : (maybe :: V -> V)<a>) -> bool;
+// Convert a string to a boolean, using `False` for the empty string and `True` otherwise.
+fun bool .2 : (s : string) -> bool;
+// Was this a cancelation exception?
+fun cancel? .1 : (exn : exception) -> bool;
+// O(`n`). The first `n` (default = `1`) characters in a string.
+fun first : (s : string, n : ?int) -> sslice;
+// Convert the first character of a string to uppercase.
+fun capitalize : (s : string) -> string;
+// _Deprecated_; use `try` instead. Catch an exception raised by `throw` and handle it.
+// Use `on-exn` or `on-exit` when appropiate.
+fun* (.bind-catch) : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a, hndl : (exception) -> (e :: E) a) -> (e :: E) a;
+// _Deprecated_; use `try` instead. Catch an exception raised by `throw` and handle it.
+// Use `on-exn` or `on-exit` when appropiate.
+fun (.fast-catch) : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a, hndl : (exception) -> (e :: E) a) -> (e :: E) a;
+// _Deprecated_; use `try` instead. Catch an exception raised by `throw` and handle it.
+// Use `on-exn` or `on-exit` when appropiate.
+fun** catch : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a, hndl : (exception) -> (e :: E) a) -> (e :: E) a;
+fun cdivmod-exp10 : (i : int, n : int) -> (int, int);
+// Return a random boolean
+fun random-bool : () -> <(ndet :: X)> bool;
+// Returns one of its arguments `x`  or `y`  based on a non-deterministic choice.
+fun choose : forall<a> (x : a, y : a) -> <(ndet :: X)> a;
+// Concatenate all lists in a list (e.g. flatten the list). (tail-recursive)
+fun concat : forall<a> (xs : (list :: V -> V)<(list :: V -> V)<a>>) -> (list :: V -> V)<a>;
+// Concatenate a list of `:maybe` values
+fun concat-maybe : forall<a> (xs : (list :: V -> V)<(maybe :: V -> V)<a>>) -> (list :: V -> V)<a>;
+// Is the character an ASCII control character, e.g. `c < ' '`  ?
+fun control? : (c : char) -> bool;
+// Executes `action`  for each integer between `start`  upto `end`  (including both `start`  and `end` ).
+// If `start > end`  the function returns without any call to `action` .
+// If `action` returns `Just`, the iteration is stopped and the result returned
+// Executes `action`  for each integer between `start`  upto `end`  (including both `start`  and `end` ).
+// If `start > end`  the function returns without any call to `action` .
+// If `action` returns `Just`, the iteration is stopped and the result returned
+// Executes `action`  for each integer between `start`  upto `end`  (including both `start`  and `end` ).
+// If `start > end`  the function returns without any call to `action` .
+// If `action` returns `Just`, the iteration is stopped and the result returned
+// O(1). The entire string as a slice
+fun slice : (s : string) -> sslice;
+// Invoke `action` for each element of a list while `action` return `Nothing`
+fun* (.bind-foreach-while) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, action : (a) -> (e :: E) (maybe :: V -> V)<b>) -> (e :: E) (maybe :: V -> V)<b>;
+// Invoke `action` for each element of a list while `action` return `Nothing`
+fun (.fast-foreach-while) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, action : (a) -> (e :: E) (maybe :: V -> V)<b>) -> (e :: E) (maybe :: V -> V)<b>;
+// Invoke `action` for each element of a list while `action` return `Nothing`
+fun** foreach-while : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, action : (a) -> (e :: E) (maybe :: V -> V)<b>) -> (e :: E) (maybe :: V -> V)<b>;
+// Apply a function for each character in a string slice.
+// If `action` returns `Just`, the function returns immediately with that result.
+fun* (.bind-foreach-while) .1 : forall<a,(e :: E)> (slice : sslice, action : (c : char) -> (e :: E) (maybe :: V -> V)<a>) -> (e :: E) (maybe :: V -> V)<a>;
+// Apply a function for each character in a string slice.
+// If `action` returns `Just`, the function returns immediately with that result.
+fun (.fast-foreach-while) .1 : forall<a,(e :: E)> (slice : sslice, action : (c : char) -> (e :: E) (maybe :: V -> V)<a>) -> (e :: E) (maybe :: V -> V)<a>;
+// Apply a function for each character in a string slice.
+// If `action` returns `Just`, the function returns immediately with that result.
+fun** foreach-while .1 : forall<a,(e :: E)> (slice : sslice, action : (c : char) -> (e :: E) (maybe :: V -> V)<a>) -> (e :: E) (maybe :: V -> V)<a>;
+// Invoke a function for each character in a string.
+// If `action` returns `Just`, the function returns immediately with that result.
+fun* (.bind-foreach-while) .2 : forall<a,(e :: E)> (s : string, action : (c : char) -> (e :: E) (maybe :: V -> V)<a>) -> (e :: E) (maybe :: V -> V)<a>;
+// Invoke a function for each character in a string.
+// If `action` returns `Just`, the function returns immediately with that result.
+fun (.fast-foreach-while) .2 : forall<a,(e :: E)> (s : string, action : (c : char) -> (e :: E) (maybe :: V -> V)<a>) -> (e :: E) (maybe :: V -> V)<a>;
+// Invoke a function for each character in a string.
+// If `action` returns `Just`, the function returns immediately with that result.
+fun** foreach-while .2 : forall<a,(e :: E)> (s : string, action : (c : char) -> (e :: E) (maybe :: V -> V)<a>) -> (e :: E) (maybe :: V -> V)<a>;
+// Invoke a function `f` for each element in a vector `v`.
+// If `f` returns `Just`, the iteration is stopped early and the result is returned.
+fun* (.bind-foreach-while) .3 : forall<a,b,(e :: E)> (v : (vector :: V -> V)<a>, f : (a) -> (e :: E) (maybe :: V -> V)<b>) -> (e :: E) (maybe :: V -> V)<b>;
+// Invoke a function `f` for each element in a vector `v`.
+// If `f` returns `Just`, the iteration is stopped early and the result is returned.
+fun (.fast-foreach-while) .3 : forall<a,b,(e :: E)> (v : (vector :: V -> V)<a>, f : (a) -> (e :: E) (maybe :: V -> V)<b>) -> (e :: E) (maybe :: V -> V)<b>;
+// Invoke a function `f` for each element in a vector `v`.
+// If `f` returns `Just`, the iteration is stopped early and the result is returned.
+fun** foreach-while .3 : forall<a,b,(e :: E)> (v : (vector :: V -> V)<a>, f : (a) -> (e :: E) (maybe :: V -> V)<b>) -> (e :: E) (maybe :: V -> V)<b>;
+// Invoke `action` for each element of a list
+fun* (.bind-foreach) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, action : (a) -> (e :: E) ()) -> (e :: E) ();
+// Invoke `action` for each element of a list
+fun (.fast-foreach) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, action : (a) -> (e :: E) ()) -> (e :: E) ();
+// Invoke `action` for each element of a list
+fun** foreach : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, action : (a) -> (e :: E) ()) -> (e :: E) ();
+// Apply a function for each character in a string slice.
+fun* (.bind-foreach) .1 : forall<(e :: E)> (slice : sslice, action : (c : char) -> (e :: E) ()) -> (e :: E) ();
+// Apply a function for each character in a string slice.
+fun (.fast-foreach) .1 : forall<(e :: E)> (slice : sslice, action : (c : char) -> (e :: E) ()) -> (e :: E) ();
+// Apply a function for each character in a string slice.
+fun** foreach .1 : forall<(e :: E)> (slice : sslice, action : (c : char) -> (e :: E) ()) -> (e :: E) ();
+// Invoke a function for each character in a string
+fun* (.bind-foreach) .2 : forall<(e :: E)> (s : string, action : (c : char) -> (e :: E) ()) -> (e :: E) ();
+// Invoke a function for each character in a string
+fun (.fast-foreach) .2 : forall<(e :: E)> (s : string, action : (c : char) -> (e :: E) ()) -> (e :: E) ();
+// Invoke a function for each character in a string
+fun** foreach .2 : forall<(e :: E)> (s : string, action : (c : char) -> (e :: E) ()) -> (e :: E) ();
+// Invoke a function `f` for each element in a vector `v`
+fun* (.bind-foreach) .3 : forall<a,(e :: E)> (v : (vector :: V -> V)<a>, f : (a) -> (e :: E) ()) -> (e :: E) ();
+// Invoke a function `f` for each element in a vector `v`
+fun (.fast-foreach) .3 : forall<a,(e :: E)> (v : (vector :: V -> V)<a>, f : (a) -> (e :: E) ()) -> (e :: E) ();
+// Invoke a function `f` for each element in a vector `v`
+fun** foreach .3 : forall<a,(e :: E)> (v : (vector :: V -> V)<a>, f : (a) -> (e :: E) ()) -> (e :: E) ();
+// O(n). Return the number of characters in a string.
+fun count .1 : (s : string) -> int;
+// O(n). Return the number of characters in a string slice
+fun count .2 : (slice : sslice) -> int;
+// Count the number of times a predicate is true for each character in a string
+fun count .3 : (s : string, pred : (char) -> bool) -> int;
+// Create a new `:delayed` value.
+fun delay : forall<a,(e :: E)> (action : () -> (e :: E) a) -> (delayed :: (E, V) -> V)<(e :: E),a>;
+// Calculate `10^exp`
+fun exp10 : (exp : int) -> int;
+// Is the integer negative (stricly smaller than zero)
+fun neg? .1 : (i : int) -> bool;
+// Is the value negative?
+fun neg? .2 : (d : double) -> bool;
+fun divmod-exp10 : (i : int, n : int) -> (int, int);
+// Drop the first `n` elements of a list (or fewer if the list is shorter than `n`)
+fun drop : forall<a> (xs : (list :: V -> V)<a>, n : int) -> (list :: V -> V)<a>;
+fun* (.bind-span) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) ((list :: V -> V)<a>, (list :: V -> V)<a>);
+fun (.fast-span) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) ((list :: V -> V)<a>, (list :: V -> V)<a>);
+fun** span : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) ((list :: V -> V)<a>, (list :: V -> V)<a>);
+// Drop all initial elements that satisfy `predicate`
+fun* (.bind-drop-while) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) (list :: V -> V)<a>;
+// Drop all initial elements that satisfy `predicate`
+fun (.fast-drop-while) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) (list :: V -> V)<a>;
+// Drop all initial elements that satisfy `predicate`
+fun** drop-while : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) (list :: V -> V)<a>;
+// Does string `s`  end with `post`?
+// If so, returns a slice of `s` from the start up to the `post` string at the end.
+fun ends-with : (s : string, post : string) -> (maybe :: V -> V)<sslice>;
+// Calculate `2^exp`.
+fun exp2 : (exp : int) -> int;
+// Retain only those elements of a list that satisfy the given predicate `pred`.
+// For example: `filter([1,2,3],odd?) == [1,3]`
+fun* (.bind-filter) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, pred : (a) -> (e :: E) bool) -> (e :: E) (list :: V -> V)<a>;
+// Retain only those elements of a list that satisfy the given predicate `pred`.
+// For example: `filter([1,2,3],odd?) == [1,3]`
+fun (.fast-filter) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, pred : (a) -> (e :: E) bool) -> (e :: E) (list :: V -> V)<a>;
+// Retain only those elements of a list that satisfy the given predicate `pred`.
+// For example: `filter([1,2,3],odd?) == [1,3]`
+fun** filter : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, pred : (a) -> (e :: E) bool) -> (e :: E) (list :: V -> V)<a>;
+// Retain only those elements of a list that satisfy the given predicate `pred`.
+// For example: `filterMap([1,2,3],fun(i) { if (i.odd?) then Nothing else Just(i*i) }) == [4]`
+fun* (.bind-filter-map) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, pred : (a) -> (e :: E) (maybe :: V -> V)<b>) -> (e :: E) (list :: V -> V)<b>;
+// Retain only those elements of a list that satisfy the given predicate `pred`.
+// For example: `filterMap([1,2,3],fun(i) { if (i.odd?) then Nothing else Just(i*i) }) == [4]`
+fun (.fast-filter-map) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, pred : (a) -> (e :: E) (maybe :: V -> V)<b>) -> (e :: E) (list :: V -> V)<b>;
+// Retain only those elements of a list that satisfy the given predicate `pred`.
+// For example: `filterMap([1,2,3],fun(i) { if (i.odd?) then Nothing else Just(i*i) }) == [4]`
+fun** filter-map : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, pred : (a) -> (e :: E) (maybe :: V -> V)<b>) -> (e :: E) (list :: V -> V)<b>;
+// Was this a finalization exception?
+fun finalize? .1 : (exn : exception) -> bool;
+// Find the first element satisfying some predicate
+fun find : forall<a> (xs : (list :: V -> V)<a>, pred : (a) -> bool) -> (maybe :: V -> V)<a>;
+// O(n). If it occurs, return the position of substring `sub` in `s`, tupled with
+// the position just following the substring `sub`.
+fun find .1 : (s : string, sub : string) -> (maybe :: V -> V)<sslice>;
+// Return the last index of substring `sub` in `s` if it occurs.
+fun find-last : (s : string, sub : string) -> (maybe :: V -> V)<sslice>;
+// Find the first element satisfying some predicate and return it.
+fun find-maybe : forall<a,b> (xs : (list :: V -> V)<a>, pred : (a) -> (maybe :: V -> V)<b>) -> (maybe :: V -> V)<b>;
+// Concatenate the result lists from applying a function to all elements.
+fun* (.bind-flatmap) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (a) -> (e :: E) (list :: V -> V)<b>) -> (e :: E) (list :: V -> V)<b>;
+// Concatenate the result lists from applying a function to all elements.
+fun (.fast-flatmap) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (a) -> (e :: E) (list :: V -> V)<b>) -> (e :: E) (list :: V -> V)<b>;
+// Concatenate the result lists from applying a function to all elements.
+fun** flatmap : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (a) -> (e :: E) (list :: V -> V)<b>) -> (e :: E) (list :: V -> V)<b>;
+fun* (.bind-foldl1) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, f : (a, a) -> <(exn :: X)|(e :: E)> a) -> <(exn :: X)|(e :: E)> a;
+fun (.fast-foldl1) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, f : (a, a) -> <(exn :: X)|(e :: E)> a) -> <(exn :: X)|(e :: E)> a;
+fun** foldl1 : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, f : (a, a) -> <(exn :: X)|(e :: E)> a) -> <(exn :: X)|(e :: E)> a;
+// Fold a list from the right, i.e. `foldr([1,2],0,(+)) == 1+(2+0)`
+// Note, `foldr` is less efficient than `foldl` as it reverses the list first.
+fun* (.bind-foldr) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, z : b, f : (a, b) -> (e :: E) b) -> (e :: E) b;
+// Fold a list from the right, i.e. `foldr([1,2],0,(+)) == 1+(2+0)`
+// Note, `foldr` is less efficient than `foldl` as it reverses the list first.
+fun (.fast-foldr) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, z : b, f : (a, b) -> (e :: E) b) -> (e :: E) b;
+// Fold a list from the right, i.e. `foldr([1,2],0,(+)) == 1+(2+0)`
+// Note, `foldr` is less efficient than `foldl` as it reverses the list first.
+fun** foldr : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, z : b, f : (a, b) -> (e :: E) b) -> (e :: E) b;
+fun* (.bind-foldr1) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, f : (a, a) -> <(exn :: X)|(e :: E)> a) -> <(exn :: X)|(e :: E)> a;
+fun (.fast-foldr1) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, f : (a, a) -> <(exn :: X)|(e :: E)> a) -> <(exn :: X)|(e :: E)> a;
+fun** foldr1 : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, f : (a, a) -> <(exn :: X)|(e :: E)> a) -> <(exn :: X)|(e :: E)> a;
+// Executes `action`  for each integer between `start`  upto `end`  (including both `start`  and `end` ).
+// If `start > end`  the function returns without any call to `action` .
+// If `action` returns `Just`, the iteration is stopped and the result returned
+fun* (.bind-for-while) : forall<a,(e :: E)> (start : int, end : int, action : (int) -> (e :: E) (maybe :: V -> V)<a>) -> (e :: E) (maybe :: V -> V)<a>;
+// Executes `action`  for each integer between `start`  upto `end`  (including both `start`  and `end` ).
+// If `start > end`  the function returns without any call to `action` .
+// If `action` returns `Just`, the iteration is stopped and the result returned
+fun (.fast-for-while) : forall<a,(e :: E)> (start : int, end : int, action : (int) -> (e :: E) (maybe :: V -> V)<a>) -> (e :: E) (maybe :: V -> V)<a>;
+// Executes `action`  for each integer between `start`  upto `end`  (including both `start`  and `end` ).
+// If `start > end`  the function returns without any call to `action` .
+// If `action` returns `Just`, the iteration is stopped and the result returned
+fun** for-while : forall<a,(e :: E)> (start : int, end : int, action : (int) -> (e :: E) (maybe :: V -> V)<a>) -> (e :: E) (maybe :: V -> V)<a>;
+// Force a delayed value; the value is computed only on the first
+// call to `force` and cached afterwards.
+fun* (.bind-force) : forall<a,(e :: E)> (delayed : (delayed :: (E, V) -> V)<(e :: E),a>) -> (e :: E) a;
+// Force a delayed value; the value is computed only on the first
+// call to `force` and cached afterwards.
+fun (.fast-force) : forall<a,(e :: E)> (delayed : (delayed :: (E, V) -> V)<(e :: E),a>) -> (e :: E) a;
+// Force a delayed value; the value is computed only on the first
+// call to `force` and cached afterwards.
+fun** force : forall<a,(e :: E)> (delayed : (delayed :: (E, V) -> V)<(e :: E),a>) -> (e :: E) a;
+// Invoke `action` for each element of a list, passing also the position of the element.
+fun* (.bind-foreach-indexed) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, action : (int, a) -> (e :: E) ()) -> (e :: E) ();
+// Invoke `action` for each element of a list, passing also the position of the element.
+fun (.fast-foreach-indexed) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, action : (int, a) -> (e :: E) ()) -> (e :: E) ();
+// Invoke `action` for each element of a list, passing also the position of the element.
+fun** foreach-indexed : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, action : (int, a) -> (e :: E) ()) -> (e :: E) ();
+// Invoke a function `f` for each element in a vector `v`
+fun* (.bind-foreach-indexed) .1 : forall<a,(e :: E)> (v : (vector :: V -> V)<a>, f : (a, int) -> (e :: E) ()) -> (e :: E) ();
+// Invoke a function `f` for each element in a vector `v`
+fun (.fast-foreach-indexed) .1 : forall<a,(e :: E)> (v : (vector :: V -> V)<a>, f : (a, int) -> (e :: E) ()) -> (e :: E) ();
+// Invoke a function `f` for each element in a vector `v`
+fun** foreach-indexed .1 : forall<a,(e :: E)> (v : (vector :: V -> V)<a>, f : (a, int) -> (e :: E) ()) -> (e :: E) ();
+// Concatenate all strings in a list
+// Concatenate all strings in a list
+fun join .2 : (xs : (list :: V -> V)<string>) -> string;
+// Concatenate all strings in a list using a specific separator
+fun join .3 : (xs : (list :: V -> V)<string>, sep : string) -> string;
+// Right-align a string to width `width`  using `fill`  (default is a space) to fill from the left.
+fun pad-left : (s : string, width : int, fill : ?char) -> string;
+// Show an `:int` as a hexadecimal value.\
+// The `width`  parameter specifies how wide the hex value is where `"0"`  is used to align.\
+// The `use-capitals` parameter (= `True`) determines if captical letters should be used to display the hexadecimal digits.\
+// The `pre` (=`"0x"`) is an optional prefix for the number (goes between the sign and the number).
+fun show-hex : (i : int, width : ?int, use-capitals : ?bool, pre : ?string) -> string;
+// Show a character as a string
+// Show a `:double` in exponential (scientific) notation.
+// The optional `precision` (= `-17`) specifies the precision.
+// If `>=0` it specifies the number of digits behind the dot (up to `17` max).
+// If negative, then at most the absolute value of `precision` digits behind the dot are used.
+fun show-exp : (d : double, precision : ?int) -> string;
+// Show a `:double` fixed-point notation.
+// The optional `precision` (= `-2`) specifies the maximum precision.
+// If `>=0` it specifies the number of digits behind the dot (up to `20` max).
+// If negative, then at most the absolute value of `precision` digits behind the dot are used.
+// This may still show a number in exponential notation if the it is too small or large,
+// in particular, for  a `d` where `d > 1.0e21` or `d < 1.0e-15`, or if
+// `precision.abs > 17`, the `show-exp` routine is used.
+fun show-fixed : (d : double, precision : ?int) -> string;
+// Convert a list to a string
+fun* (.bind-show-list) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, show-elem : (a) -> (e :: E) string) -> (e :: E) string;
+// Convert a list to a string
+fun (.fast-show-list) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, show-elem : (a) -> (e :: E) string) -> (e :: E) string;
+// Convert a list to a string
+fun** show-list : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, show-elem : (a) -> (e :: E) string) -> (e :: E) string;
+// Show the exception message and its stack trace.
+fun show : (exn : exception) -> string;
+// Convert an `:int` to a string
+fun show .1 : (i : int) -> string;
+// Convert a `:bool` to a string
+fun show .5 : (b : bool) -> string;
+fun show .10 : (xs : (list :: V -> V)<bool>) -> string;
+// Show a `:double` as a string.
+// If `d >= 1.0e-5` and `d < 1.0e+21`, `show-fixed` is used and otherwise `show-exp`.
+// Default `precision` is `-17`.
+fun show .2 : (d : double, precision : ?int) -> string;
+// Show a `:char` as a character literal
+fun show .3 : (c : char) -> string;
+// Show a string as a string literal
+fun show .4 : (s : string) -> string;
+// Convert a unit value `()` to a string
+fun show .6 : (u : ()) -> string;
+// Show an `:sslice` as a string literal
+fun show .7 : (s : sslice) -> string;
+fun show .8 : (xs : (list :: V -> V)<string>) -> string;
+fun show .9 : (xs : (list :: V -> V)<int>) -> string;
+// Print a string to the console.
+fun print : (s : string) -> <(console :: X)> ();
+// Print an integer to the console.
+fun print .1 : (i : int) -> <(console :: X)> ();
+// Print a double to the console.
+fun print .2 : (d : double) -> <(console :: X)> ();
+// Print a boolean to the console
+fun print .3 : (b : bool) -> <(console :: X)> ();
+// Print a character to the console.
+fun print .4 : (c : char) -> <(console :: X)> ();
+// Print a unit value to the console
+fun print .5 : (u : ()) -> <(console :: X)> ();
+// Generic print routine: prints the internal representation as a string to the console,
+// including a final newline character.
+// Note: this breaks parametricity so it should not be public
+// Print a string to the console, including a final newline character.
+fun println : (s : string) -> <(console :: X)> ();
+// Print an integer to the console, including a final newline character.
+fun println .1 : (i : int) -> <(console :: X)> ();
+// Print a double to the console, including a final newline character.
+fun println .2 : (d : double) -> <(console :: X)> ();
+// Print a boolean to the console, including a final newline character
+fun println .3 : (b : bool) -> <(console :: X)> ();
+// Print a character to the console, including a final newline character.
+fun println .4 : (c : char) -> <(console :: X)> ();
+// Print a unit value to the console, including a final newline character
+fun println .5 : (u : ()) -> <(console :: X)> ();
+// Generic print routine: prints the internal representation as a string to the console, including a final newline character.
+// Note: this breaks parametricity so it should not be public
+// Return the head of list if the list is not empty.
+fun head .1 : forall<a> (xs : (list :: V -> V)<a>) -> (maybe :: V -> V)<a>;
+// Return the head of list if the list is not empty, or use `default` otherwise
+fun head .2 : forall<a> (xs : (list :: V -> V)<a>, default : a) -> a;
+// Return the first character of a string as a string (or the empty string)
+fun head .3 : (s : string) -> string;
+// Return the first character of a string (or `Nothing` for the empty string).
+fun head-char : (s : string) -> (maybe :: V -> V)<char>;
+// Is the character an ASCII hexa-decimal digit ?
+fun hex-digit? : (c : char) -> bool;
+// Returns the index of the first element where `pred` holds, or `-1` if no such element exists.
+fun index-of : forall<a> (xs : (list :: V -> V)<a>, pred : (a) -> bool) -> int;
+// Return the list without its last element.
+// Return an empty list for an empty list.
+fun init : forall<a> (xs : (list :: V -> V)<a>) -> (list :: V -> V)<a>;
+// Append `end` to each string in the list `xs` and join them all together.\
+// `join-end([],end) === ""`\
+// `join-end(["a","b"],"/") === "a/b/"`
+fun join-end : (xs : (list :: V -> V)<string>, end : string) -> string;
+// Return the last element of a list (or `Nothing` for the empty list)
+fun last : forall<a> (xs : (list :: V -> V)<a>) -> (maybe :: V -> V)<a>;
+// Return the last element of a list (or `default` for the empty list)
+fun last .1 : forall<a> (xs : (list :: V -> V)<a>, default : a) -> a;
+// O(`n`). The last `n` (default = `1`) characters in a string
+fun last .2 : (s : string, n : ?int) -> sslice;
+// Take the first `n` elements of a list (or fewer if the list is shorter than `n`)
+fun take : forall<a> (xs : (list :: V -> V)<a>, n : int) -> (list :: V -> V)<a>;
+// split a list at position `n`
+fun split : forall<a> (xs : (list :: V -> V)<a>, n : int) -> ((list :: V -> V)<a>, (list :: V -> V)<a>);
+// Split a string into parts that were delimited by `sep`. The delimeters are not included in the results.
+// For example: `split("1,,2",",") == ["1","","2]`
+fun split .1 : (s : string, sep : string) -> (list :: V -> V)<string>;
+// Split a string into at most `n` parts that were delimited by a string `sep`. The delimeters are not included in the results (except for possibly the final part).
+// For example: `split("1,2,3",",",2) == ["1","2,3"]`
+fun split .2 : (s : string, sep : string, n : int) -> (list :: V -> V)<string>;
+// Split a string into a list of lines
+fun lines : (s : string) -> (list :: V -> V)<string>;
+// Lookup the first element satisfying some predicate
+fun lookup : forall<a,b> (xs : (list :: V -> V)<(a, b)>, pred : (a) -> bool) -> (maybe :: V -> V)<b>;
+// Apply a function `f`  to each element of the input list in sequence where takes
+// both the index of the current element and the element itself as arguments.
+fun* (.bind-map-indexed) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (idx : int, value : a) -> (e :: E) b) -> (e :: E) (list :: V -> V)<b>;
+// Apply a function `f`  to each element of the input list in sequence where takes
+// both the index of the current element and the element itself as arguments.
+fun (.fast-map-indexed) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (idx : int, value : a) -> (e :: E) b) -> (e :: E) (list :: V -> V)<b>;
+// Apply a function `f`  to each element of the input list in sequence where takes
+// both the index of the current element and the element itself as arguments.
+fun** map-indexed : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (idx : int, value : a) -> (e :: E) b) -> (e :: E) (list :: V -> V)<b>;
+// Apply a function `f`  to each element of the input list in sequence where `f` takes
+// both the current element and the tail list as arguments.
+fun* (.bind-map-peek) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (value : a, rest : (list :: V -> V)<a>) -> (e :: E) b) -> (e :: E) (list :: V -> V)<b>;
+// Apply a function `f`  to each element of the input list in sequence where `f` takes
+// both the current element and the tail list as arguments.
+fun (.fast-map-peek) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (value : a, rest : (list :: V -> V)<a>) -> (e :: E) b) -> (e :: E) (list :: V -> V)<b>;
+// Apply a function `f`  to each element of the input list in sequence where `f` takes
+// both the current element and the tail list as arguments.
+fun** map-peek : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, f : (value : a, rest : (list :: V -> V)<a>) -> (e :: E) b) -> (e :: E) (list :: V -> V)<b>;
+// Invoke `action` on each element of a list while `action` returns `Just`
+fun* (.bind-map-while) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, action : (a) -> (e :: E) (maybe :: V -> V)<b>) -> (e :: E) (list :: V -> V)<b>;
+// Invoke `action` on each element of a list while `action` returns `Just`
+fun (.fast-map-while) : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, action : (a) -> (e :: E) (maybe :: V -> V)<b>) -> (e :: E) (list :: V -> V)<b>;
+// Invoke `action` on each element of a list while `action` returns `Just`
+fun** map-while : forall<a,b,(e :: E)> (xs : (list :: V -> V)<a>, action : (a) -> (e :: E) (maybe :: V -> V)<b>) -> (e :: E) (list :: V -> V)<b>;
+// Returns the largest element of a list of integers (or `default` (=`0`) for the empty list)
+fun maximum : (xs : (list :: V -> V)<int>, default : ?int) -> int;
+// Returns the largest element of a list of doubles (or `0` for the empty list)
+fun maximum .1 : (xs : (list :: V -> V)<double>) -> double;
+// Transform a `:try` type to a `:maybe` value.
+fun maybe : forall<a> (t : (try :: V -> V)<a>) -> (maybe :: V -> V)<exception>;
+// Transform a `:null` type to a `:maybe` type. Note that it is not
+// always the case that `id(x) == maybe(null(x))` (e.g. when `x = Just(Nothing)`).
+fun maybe .1 : forall<a> (n : (null :: V -> V)<a>) -> (maybe :: V -> V)<a>;
+// Match a `:maybe` value and either return a default value on `Nothing` or apply a function to the value on `Just`
+fun* (.bind-maybe) .2 : forall<a,b,(e :: E)> (m : (maybe :: V -> V)<a>, onNothing : b, onJust : (a) -> (e :: E) b) -> (e :: E) b;
+// Match a `:maybe` value and either return a default value on `Nothing` or apply a function to the value on `Just`
+fun (.fast-maybe) .2 : forall<a,b,(e :: E)> (m : (maybe :: V -> V)<a>, onNothing : b, onJust : (a) -> (e :: E) b) -> (e :: E) b;
+// Match a `:maybe` value and either return a default value on `Nothing` or apply a function to the value on `Just`
+fun** maybe .2 : forall<a,b,(e :: E)> (m : (maybe :: V -> V)<a>, onNothing : b, onJust : (a) -> (e :: E) b) -> (e :: E) b;
+// Convert a `:maybe<a>` value to `:a`, using the `nothing` parameter for `Nothing`.
+// This is an alias for `default`.
+fun maybe .3 : forall<a> (m : (maybe :: V -> V)<a>, nothing : a) -> a;
+// Convert a `:either` to a `:maybe` type discarding the value of the `Left` constructor
+// and using `Just` for the `Right` constructor.
+fun maybe .4 : forall<a,b> (e : (either :: (V, V) -> V)<a,b>) -> (maybe :: V -> V)<b>;
+// Convert a list to a `:maybe` type, using `Nothing` for an empty list, and otherwise `Just` on the head element.
+// Note: this is just `head`.
+fun maybe .5 : forall<a> (xs : (list :: V -> V)<a>) -> (maybe :: V -> V)<a>;
+// Transform a boolean to a maybe type, using `Nothing` for `False`
+fun maybe .6 : (b : bool) -> (maybe :: V -> V)<()>;
+// Transform an integer to a maybe type, using `Nothing` for `0`
+fun maybe .7 : (i : int) -> (maybe :: V -> V)<int>;
+// Transform a string to a maybe type, using `Nothing` for an empty string
+fun maybe .8 : (s : string) -> (maybe :: V -> V)<string>;
+// Returns the smallest element of a list of integers (or `default` (=`0`) for the empty list)
+fun minimum : (xs : (list :: V -> V)<int>, default : ?int) -> int;
+// Returns the smallest element of a list of doubles (or `0` for the empty list)
+fun minimum .1 : (xs : (list :: V -> V)<double>) -> double;
+// Is a slice not empty?
+fun notempty? : (slice : sslice) -> bool;
+// Is a string not empty?
+fun notempty? .1 : (s : string) -> bool;
+// Disable tracing completely.
+fun notrace : () -> <(st :: H -> E)<(global :: H)>> ();
+// Transform a `:maybe` type to a `:null` type (using `null` for `Nothing`).
+fun null : forall<a> (x : (maybe :: V -> V)<a>) -> (null :: V -> V)<a>;
+// Cast a integer that is zero to a null
+fun null .1 : (i : int) -> (null :: V -> V)<int>;
+// Cast an empty string a null
+fun null .2 : (s : string) -> (null :: V -> V)<string>;
+// Cast a boolean `False` to null
+fun null .3 : (b : bool) -> (null :: V -> V)<()>;
+val null-const : forall<a> (null :: V -> V)<a>;
+val null-return : forall<a,(e :: E)> (null :: V -> V)<(a) -> (e :: E) a>;
+val null-return1 : forall<a,b,(e :: E)> (null :: V -> V)<(a, b) -> (e :: E) a>;
+// Set a `hndler` that is always called when the `action` finishes (either normally or with an exception).
+// Note that `on-exit(handler,action) == finally(action,handler)`.
+fun* (.bind-on-exit) : forall<a,(e :: E)> (hndler : () -> (e :: E) (), action : () -> (e :: E) a) -> (e :: E) a;
+// Set a `hndler` that is always called when the `action` finishes (either normally or with an exception).
+// Note that `on-exit(handler,action) == finally(action,handler)`.
+fun (.fast-on-exit) : forall<a,(e :: E)> (hndler : () -> (e :: E) (), action : () -> (e :: E) a) -> (e :: E) a;
+// Set a `hndler` that is always called when the `action` finishes (either normally or with an exception).
+// Note that `on-exit(handler,action) == finally(action,handler)`.
+fun** on-exit : forall<a,(e :: E)> (hndler : () -> (e :: E) (), action : () -> (e :: E) a) -> (e :: E) a;
+// Set a `hndler` that is called only when an exception is raised in the `action` block.
+fun* (.bind-on-exn) : forall<a,(e :: E)> (hndler : (exception) -> <(exn :: X)|(e :: E)> (), action : () -> <(exn :: X)|(e :: E)> a) -> <(exn :: X)|(e :: E)> a;
+// Set a `hndler` that is called only when an exception is raised in the `action` block.
+fun (.fast-on-exn) : forall<a,(e :: E)> (hndler : (exception) -> <(exn :: X)|(e :: E)> (), action : () -> <(exn :: X)|(e :: E)> a) -> <(exn :: X)|(e :: E)> a;
+// Set a `hndler` that is called only when an exception is raised in the `action` block.
+fun** on-exn : forall<a,(e :: E)> (hndler : (exception) -> <(exn :: X)|(e :: E)> (), action : () -> <(exn :: X)|(e :: E)> a) -> <(exn :: X)|(e :: E)> a;
+// Given a total function to calculate a value `:a`, return
+// a total function that only calculates the value once and then
+// returns the cached result.
+fun once : forall<a> (calc : () -> a) -> (() -> a);
+// Left-align a string to width `width`  using `fill`  (default is a space) to fill on the right.
+fun pad-right : (s : string, width : int, fill : ?char) -> string;
+// Is `pre`  a prefix of `s`? If so, returns a slice
+// of `s` following `pre` up to the end of `s`.
+fun starts-with : (s : string, pre : string) -> (maybe :: V -> V)<sslice>;
+// Trim off a substring `sub` while `s` starts with that string.
+fun trim-left .1 : (s : string, sub : string) -> string;
+// Trim off a substring `sub` while `s` ends with that string.
+fun trim-right .1 : (s : string, sub : string) -> string;
+// Trim whitespace on the left and right side of a string
+fun trim : (s : string) -> string;
+// Parse an integer after trimming whitespace.
+// If an illegal digit character is encountered `Nothing` is returned.
+// An empty string will result in `Just(0)`.
+// A string can start with a `-` sign for negative numbers,
+// and with `0x` or `0X` for hexadecimal numbers (in which case the `hex` parameter is ignored).
+fun parse-int : (s : string, hex : ?bool) -> (maybe :: V -> V)<int>;
+// Parse an integer using `parseInt`. If an illegal digit character is encountered the
+// `default` value is returned. An empty string will also result in `default`.
+fun parse-int-default : (s : string, default : ?int, hex : ?bool) -> int;
+// Partition a list in two lists where the first list contains
+// those elements that satisfy the given predicate `pred`.
+// For example: `partition([1,2,3],odd?) == ([1,3],[2])`
+fun partition : forall<a> (xs : (list :: V -> V)<a>, pred : (a) -> bool) -> ((list :: V -> V)<a>, (list :: V -> V)<a>);
+// redirect `print` and `println` calls to a specified function.
+fun print-redirect : (print : (msg : string) -> <(console :: X)> ()) -> <(io :: E)> ();
+// Remove those elements of a list that satisfy the given predicate `pred`.
+// For example: `remove([1,2,3],odd?) == [2]`
+fun remove : forall<a> (xs : (list :: V -> V)<a>, pred : (a) -> bool) -> (list :: V -> V)<a>;
+// Repeat a string `n` times
+fun repeat : (s : string, n : int) -> string;
+// The `repeat` fun executes `action`  `n`  times.
+fun* (.bind-repeat) .1 : forall<(e :: E)> (n : int, action : () -> (e :: E) ()) -> (e :: E) ();
+// The `repeat` fun executes `action`  `n`  times.
+fun (.fast-repeat) .1 : forall<(e :: E)> (n : int, action : () -> (e :: E) ()) -> (e :: E) ();
+// The `repeat` fun executes `action`  `n`  times.
+fun** repeat .1 : forall<(e :: E)> (n : int, action : () -> (e :: E) ()) -> (e :: E) ();
+// Create a list of `n`  repeated elementes `x`
+fun replicate : forall<a> (x : a, n : int) -> (list :: V -> V)<a>;
+fun show-tuple : forall<a,b> (x : (a, b), showfst : (a) -> string, showsnd : (b) -> string) -> string;
+// Return the tail of list. Returns the empty list if `xs` is empty.
+fun tail .1 : forall<a> (xs : (list :: V -> V)<a>) -> (list :: V -> V)<a>;
+// Return the tail of a string (or the empty string)
+fun tail .2 : (s : string) -> string;
+// Keep only those initial elements that satisfy `predicate`
+fun* (.bind-take-while) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) (list :: V -> V)<a>;
+// Keep only those initial elements that satisfy `predicate`
+fun (.fast-take-while) : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) (list :: V -> V)<a>;
+// Keep only those initial elements that satisfy `predicate`
+fun** take-while : forall<a,(e :: E)> (xs : (list :: V -> V)<a>, predicate : (a) -> (e :: E) bool) -> (e :: E) (list :: V -> V)<a>;
+fun todo : (message : string) -> ();
+// Trace a message used for debug purposes.
+// The behaviour is system dependent. On a browser and node it uses
+// `console.log`  by default.
+// Disabled if `notrace` is called.
+fun trace : (message : string) -> ();
+fun trace-any : forall<a> (message : string, x : a) -> ();
+// Truncate a string to `count` characters.
+fun truncate : (s : string, count : int) -> string;
+// Return a default value when an exception is raised
+fun* (.bind-try-default) : forall<a,(e :: E)> (value : a, action : () -> <(exn :: X)|(e :: E)> a) -> (e :: E) a;
+// Return a default value when an exception is raised
+fun (.fast-try-default) : forall<a,(e :: E)> (value : a, action : () -> <(exn :: X)|(e :: E)> a) -> (e :: E) a;
+// Return a default value when an exception is raised
+fun** try-default : forall<a,(e :: E)> (value : a, action : () -> <(exn :: X)|(e :: E)> a) -> (e :: E) a;
+// Returns a unique integer (modulo 32-bits).
+fun unique : () -> <(ndet :: X)> int;
+// Join a list of strings with newlines
+fun unlines : (xs : (list :: V -> V)<string>) -> string;
+// _unsafe_. The cancelation exception. User code should never throw
+// this exception as it cannot be caught (but it is respected by `finally` blocks).
+// It is used internally to `finalize` effect handlers that do not resume.
+fun unsafe-cancel-exn : () -> exception;
+// _Unsafe_. This function removes the non-termination effect (`:div`) from the effect of an action
+fun* (.bind-unsafe-nodiv) : forall<a,(e :: E)> (action : () -> <(div :: X)|(e :: E)> a) -> (e :: E) a;
+// _Unsafe_. This function removes the non-termination effect (`:div`) from the effect of an action
+fun (.fast-unsafe-nodiv) : forall<a,(e :: E)> (action : () -> <(div :: X)|(e :: E)> a) -> (e :: E) a;
+// _Unsafe_. This function removes the non-termination effect (`:div`) from the effect of an action
+fun** unsafe-nodiv : forall<a,(e :: E)> (action : () -> <(div :: X)|(e :: E)> a) -> (e :: E) a;
+// _unsafe_. Catch any exception, including a possible cancelation.
+// Unsafe to use in general as you must guarantee to later use `untry` to re-throw
+// at least a cancelation exception.
+fun* (.bind-unsafe-try-all) : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a) -> (e :: E) (try :: V -> V)<a>;
+// _unsafe_. Catch any exception, including a possible cancelation.
+// Unsafe to use in general as you must guarantee to later use `untry` to re-throw
+// at least a cancelation exception.
+fun (.fast-unsafe-try-all) : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a) -> (e :: E) (try :: V -> V)<a>;
+// _unsafe_. Catch any exception, including a possible cancelation.
+// Unsafe to use in general as you must guarantee to later use `untry` to re-throw
+// at least a cancelation exception.
+fun** unsafe-try-all : forall<a,(e :: E)> (action : () -> <(exn :: X)|(e :: E)> a) -> (e :: E) (try :: V -> V)<a>;
+// Transform an `:try` type back to an `exn` effect.
+fun untry : forall<a> (ex : (try :: V -> V)<a>) -> <(exn :: X)> a;
+// Unzip a list of pairs into two lists
+fun unzip : forall<a,b> (xs : (list :: V -> V)<(a, b)>) -> ((list :: V -> V)<a>, (list :: V -> V)<b>);
+// Convert a string to a vector of characters.
+fun vector .1 : (s : string) -> (vector :: V -> V)<char>;
+// Create a new vector of length `n`  with initial elements `default` .
+fun vector .2 : forall<a> (n : int, default : a) -> (vector :: V -> V)<a>;
+// Convert a list to a vector.
+fun vector .3 : forall<a> (xs : (list :: V -> V)<a>) -> (vector :: V -> V)<a>;
+// Create a new vector of length `n`  with initial elements given by function `f` .
+fun vector-init : forall<a> (n : int, f : (int) -> a) -> (vector :: V -> V)<a>;
+// The `while` fun executes `action`  as long as `pred`  is `true`.
+fun* (.bind-while) : forall<(e :: E)> (predicate : () -> <(div :: X)|(e :: E)> bool, action : () -> <(div :: X)|(e :: E)> ()) -> <(div :: E)|(e :: E)> ();
+// The `while` fun executes `action`  as long as `pred`  is `true`.
+fun (.fast-while) : forall<(e :: E)> (predicate : () -> <(div :: X)|(e :: E)> bool, action : () -> <(div :: X)|(e :: E)> ()) -> <(div :: E)|(e :: E)> ();
+// The `while` fun executes `action`  as long as `pred`  is `true`.
+fun** while : forall<(e :: E)> (predicate : () -> <(div :: X)|(e :: E)> bool, action : () -> <(div :: X)|(e :: E)> ()) -> <(div :: E)|(e :: E)> ();
+// Tests if a character is an element of `" \t\n\r"`
+fun white? : (c : char) -> bool;
+// Is the value zero?
+fun zero? .1 : (d : double) -> bool;
+// Zip two lists together by apply a function `f` to all corresponding elements.
+// The returned list is only as long as the smallest input list.
+fun* (.bind-zipwith) : forall<a,b,c,(e :: E)> (xs : (list :: V -> V)<a>, ys : (list :: V -> V)<b>, f : (a, b) -> (e :: E) c) -> (e :: E) (list :: V -> V)<c>;
+// Zip two lists together by apply a function `f` to all corresponding elements.
+// The returned list is only as long as the smallest input list.
+fun (.fast-zipwith) : forall<a,b,c,(e :: E)> (xs : (list :: V -> V)<a>, ys : (list :: V -> V)<b>, f : (a, b) -> (e :: E) c) -> (e :: E) (list :: V -> V)<c>;
+// Zip two lists together by apply a function `f` to all corresponding elements.
+// The returned list is only as long as the smallest input list.
+fun** zipwith : forall<a,b,c,(e :: E)> (xs : (list :: V -> V)<a>, ys : (list :: V -> V)<b>, f : (a, b) -> (e :: E) c) -> (e :: E) (list :: V -> V)<c>;
+// Add the divergent effect to a function effect.
+external inject-div : forall<a,(e :: E)> (() -> (e :: E) a) -> (() -> <(div :: X)|(e :: E)> a) = inline "#1";
+// Add the divergent effect to a function effect.
+external inject-div .1 : forall<a,b,(e :: E)> ((a) -> (e :: E) b) -> ((a) -> <(div :: X)|(e :: E)> b) = inline "#1";
+// Add the state effect to a function effect.
+external inject-st : forall<a,b,(h :: H),(e :: E)> ((a) -> (e :: E) b) -> (total :: E) ((a) -> <(st :: H -> E)<(h :: H)>|(e :: E)> b) = inline "#1";
+// Add the state effect to a function effect.
+external inject-st .1 : forall<a,(h :: H),(e :: E)> (() -> (e :: E) a) -> (total :: E) (() -> <(st :: H -> E)<(h :: H)>|(e :: E)> a) = inline "#1";
+// Return the message associated with an exception
+// Raise a pattern match exception. This is function is used internally by the
+// compiler to generate error messages on pattern match failures.
+// Execute a `hndler` no matter what exception was raised in `action`.
+// Catch any exception raised in `action` and handle it.
+// Use `on-exn` or `on-exit` when appropiate.
+// Unsafe: transform any type to a `null` type; used internally by the compiler.
+// Transform a `:maybe` type to a `:null` type (using `null` for `Nothing`).
+// Transform a `:null` type to a `:maybe` type. Note that it is not
+// always the case that `id(x) == maybe(null(x))` (e.g. when `x = Just(Nothing)`).
+external (==) : (char, char) -> bool {
+  inline "(#1 == #2)";
+  js inline "(#1 === #2)";
+}
+external (!=) : (char, char) -> bool {
+  inline "(#1 != #2)";
+  js inline "(#1 !== #2)";
+}
+external (<=) : (char, char) -> bool = inline "(#1 <= #2)";
+external (>=) : (char, char) -> bool = inline "(#1 >= #2)";
+external (<) : (char, char) -> bool = inline "(#1 < #2)";
+external (>) : (char, char) -> bool = inline "(#1 > #2)";
+// Convert a character to its unicode code point
+external int : (char) -> int {
+  inline "#1";
+  cs inline "new BigInteger(#1)";
+}
+// Convert a unicode code point to a character
+external char : (int) -> char {
+  inline "(#1)";
+  cs inline "Primitive.IntToInt32(#1)";
+}
+external (&&) : (bool, bool) -> bool = inline "(#1 && #2)";
+external (||) : (bool, bool) -> bool = inline "(#1 || #2)";
+external not : (bool) -> bool = inline "!(#1)";
+external (!) : (bool) -> bool = inline "!(#1)";
+// Compare two integers
+external compare : (int, int) -> order {
+  cs inline "Primitive.IntCompare(#1,#2)";
+  js inline "$std_core._int_compare(#1,#2)";
+}
+// Are two integers equal?
+external (==) .1 : (int, int) -> bool {
+  cs inline "(#1 == #2)";
+  js inline "$std_core._int_eq(#1,#2)";
+}
+// Are two integers not equal?
+external (!=) .1 : (int, int) -> bool {
+  cs inline "(#1 != #2)";
+  js inline "$std_core._int_ne(#1,#2)";
+}
+// Is the first integer smaller or equal to the second?
+external (<=) .1 : (int, int) -> bool {
+  cs inline "(#1 <= #2)";
+  js inline "$std_core._int_le(#1,#2)";
+}
+// Is the first integer greater or equal to the second?
+external (>=) .1 : (int, int) -> bool {
+  cs inline "(#1 >= #2)";
+  js inline "$std_core._int_ge(#1,#2)";
+}
+// Is the first integer smaller than the second?
+external (<) .1 : (int, int) -> bool {
+  cs inline "(#1 < #2)";
+  js inline "$std_core._int_lt(#1,#2)";
+}
+// Is the first integer greater than the second?
+external (>) .1 : (int, int) -> bool {
+  cs inline "(#1 > #2)";
+  js inline "$std_core._int_gt(#1,#2)";
+}
+// Add two integers.
+external (+) : (int, int) -> int {
+  cs inline "(#1 + #2)";
+  js inline "$std_core._int_add(#1,#2)";
+}
+// Substract two integers.
+external (-) : (int, int) -> int {
+  cs inline "(#1 - #2)";
+  js inline "$std_core._int_sub(#1,#2)";
+}
+// Multiply two integers.
+external (*) : (int, int) -> int {
+  cs inline "(#1 * #2)";
+  js inline "$std_core._int_mul(#1,#2)";
+}
+// Euclidean-0 division of two integers. See also `divmod:(x : int, y : int) -> (int,int)`.
+external (/) : (x : int, y : int) -> int {
+  cs inline "Primitive.IntDiv(#1,#2)";
+  js inline "$std_core._int_div(#1,#2)";
+}
+// Euclidean modulus of two integers; always a non-negative number. See also `divmod:(x : int, y : int) -> (int,int)`.
+external (%) : (int, int) -> int {
+  cs inline "Primitive.IntMod(#1,#2)";
+  js inline "$std_core._int_mod(#1,#2)";
+}
+// Euclidean-0 division & modulus.
+// Euclidean division is defined as: For any `D`  and `d`  where `d!=0` , we have:
+//
+// 1. `D == d*(D/d) + (D%d)`
+// 2. `D%d`  is always positive where `0 <= D%d < abs(d)`
+//
+// Moreover, Euclidean-0 is a total function, for the case where `d==0`  we have
+// that `D%0 == D`  and `D/0 == 0` . So property (1) still holds, but not property (2).
+//
+// Useful laws that hold for Euclidean-0 division:
+//
+// * `D/(-d) == -(D/d)`
+// * `D%(-d) == D%d`
+// * `D/(2^n) == sar(D,n)         `  (with `0 <= n <= 31`  and `2^n`  means `2`  to the power of `n` )
+// * `D%(2^n) == D & ((2^n) - 1)  `  (with `0 <= n <= 31`  and `2^n`  means `2`  to the power of `n` )
+//
+// See also _Division and modulus for computer scientists, Daan Leijen, 2001_ for further information
+// available at: <http://research.microsoft.com/pubs/151917/divmodnote.pdf> .
+external divmod : (x : int, y : int) -> (int, int) {
+  cs inline "Primitive.IntDivMod(#1,#2)";
+  js inline "$std_core._int_divmod(#1,#2)";
+}
+// Negate an integer.
+external (~) : (i : int) -> int {
+  cs inline "(-#1)";
+  js inline "$std_core._int_negate(#1)";
+}
+// Convert an integer to a `:double`. May return `nan` if the integer is too large to represent as a `:double`.
+external double : (int) -> double {
+  cs inline "Primitive.IntToDouble(#1)";
+  js inline "$std_core._int_to_double(#1)";
+}
+// Is this an odd integer?
+external odd? : (int) -> bool {
+  cs inline "!(#1.IsEven)";
+  js inline "$std_core._int_isodd(#1)";
+}
+// Is this equal to zero?
+external zero? : (int) -> bool {
+  cs inline "(#1.IsZero)";
+  js inline "$std_core._int_iszero(#1)";
+}
+// Return the absolute value of an integer.
+external abs : (i : int) -> int {
+  cs inline "BigInteger.Abs(#1)";
+  js inline "$std_core._int_abs(#1)";
+}
+// Raise an integer `i` to the power of `exp`.
+// Return the number of ending `0` digits of `i`. Return `0` when `i==0`.
+// Return the number of decimal digits of `i`. Return `0` when `i==0`.
+external sign : (i : int) -> order {
+  cs inline "Primitive.IntSign(#1)";
+  js inline "$std_core._int_sign(#1)";
+}
+// Convert an `:int32` to an `:int`.
+external int .1 : (i : int32) -> int {
+  cs inline "(new BigInteger(#1))";
+  js inline "$std_core._int_double(#1)";
+}
+// Convert an integer to an `:int32`. The number is _clamped_ to the maximal or minimum `:int32`
+// value if it is outside the range of an `:int32`.
+external int32 : (int) -> int32 {
+  cs inline "Primitive.IntToInt32(#1)";
+  js inline "$std_core._int_to_int32(#1)";
+}
+// Minimal set of operations that we need in `std/core`.
+external (==) .2 : (double, double) -> bool {
+  inline "(#1 == #2)";
+  js inline "(#1 === #2)";
+}
+external (!=) .2 : (double, double) -> bool {
+  inline "(#1 != #2)";
+  js inline "(#1 !== #2)";
+}
+external (<=) .3 : (double, double) -> bool = inline "(#1 <= #2)";
+external (>=) .2 : (double, double) -> bool = inline "(#1 >= #2)";
+external (<) .3 : (double, double) -> bool = inline "(#1 < #2)";
+external (>) .2 : (double, double) -> bool = inline "(#1 > #2)";
+external (+) .2 : (double, double) -> double = inline "(#1 + #2)";
+external (-) .2 : (double, double) -> double = inline "(#1 - #2)";
+external (*) .1 : (double, double) -> double = inline "(#1 * #2)";
+external (/) .1 : (double, double) -> double = inline "(#1 / #2)";
+external (%) .1 : (double, double) -> double = inline "(#1 % #2)";
+// Negate a `:double`.
+external (~) .1 : (d : double) -> double = inline "(-#1)";
+// convert a `:double` to an `:int` using `round` to round to its nearest integer.
+// (rounding to an even number on a tie)
+// Returns `0` if the argument is not `finite?`.
+external int .2 : (d : double) -> int {
+  cs inline "Primitive.IntDouble(#1)";
+  js inline "$std_core._int_double(#1)";
+}
+// Returns the value `d`  raised to the power `p` .
+external (^) : (d : double, p : double) -> double {
+  cs inline "Math.Pow(#1,#2)";
+  js inline "Math.pow(#1,#2)";
+}
+// Return the absolute value of a `:double` `d`
+external abs .1 : (d : double) -> double {
+  cs inline "Math.Abs(#1)";
+  js inline "Math.abs(#1)";
+}
+// Convert a character to a string
+// Convert a vector of characters to a string.
+// Convert a string to a vector of characters.
+// Convert a string to a list of characters
+// Convert a list of characters to a string
+// Are two strings equal?
+// Uses exact equality between character codes.
+external (==) .3 : (string, string) -> bool {
+  inline "(#1 == #2)";
+  js inline "(#1 === #2)";
+}
+// Are two strings not equal?
+external (!=) .3 : (string, string) -> bool {
+  inline "(#1 != #2)";
+  js inline "(#1 !== #2)";
+}
+// Append two strings.
+external (+) .3 : (string, string) -> string = inline "(#1 + #2)";
+// Length returns the length in the platform specific encoding (and should not be exported)
+// O(n). Return the number of characters in a string.
+// O(n). Return the number of characters in a string slice
+// Return the common prefix of two strings (upto `upto` characters (default is minimum length of the two strings))
+// O(`count`). Advance the start position of a string slice by `count` characters
+// up to the end of the string.
+// A negative `count` advances the start position backwards upto the first position
+// in a string.
+// Maintains the character count of the original slice upto the end of the string.
+// For example:
+//
+// * `"abc".first.advance(1).string == "b"`,
+// * `"abc".first.advance(3).string == ""`,
+// * `"abc".last.advance(-1).string == "b"`.
+//
+// O(`count`). Extend a string slice by `count` characters up to the end of the string.
+// A negative `count` shrinks the slice up to the empty slice.
+// For example:
+//
+// * `"abc".first.extend(1).string == "ab"`
+// * `"abc".last.extend(-1).string == ""`
+//
+// O(n). Copy the `slice` argument into a fresh string.
+// Takes O(1) time if the slice covers the entire string.
+// If the slice is not empty,
+// return the first character, and a new slice that is advanced by 1.
+// Does string `s`  contain the string `sub`  ?
+// Does string `s`  contain the string `sub`  ?
+// Does string `s`  contain the string `sub`  ?
+external contains : (s : string, sub : string) -> bool {
+  cs inline "((#1).Contains(#2))";
+  js inline "((#1).indexOf(#2) >= 0)";
+}
+// Concatenate a vector of strings
+external join : (v : (vector :: V -> V)<string>) -> string {
+  cs inline "String.Concat(#1)";
+  js inline "((#1).join(''))";
+}
+// Concatenate a vector of strings with a separator `sep`
+external join .1 : (v : (vector :: V -> V)<string>, sep : string) -> (total :: E) string {
+  cs inline "Primitive.Concat(#1,#2)";
+  js inline "((#1).join(#2))";
+}
+// Replace every occurrence of `pattern` to `repl` in a string.
+external replace-all : (s : string, pattern : string, repl : string) -> string {
+  cs inline "(#1).Replace(#2,#3)";
+  js inline "(#1).replace(new RegExp((#2).replace(/[\\\\\\$\\^*+\\-{}?().]/g,'\\\\$&'),'g'),#3)";
+}
+// Count occurences of `pattern` in a string.
+external count : (s : string, pattern : string) -> int {
+  cs inline "Primitive.Count(#1,#2)";
+  js inline "((#2) ? ((#1).match(new RegExp((#2).replace(/[\\\\\\$\\^*+\\-{}?().]/g,'\\\\$&'),'g'))||[]).length : 0)";
+}
+// Convert a string to upper-case
+// Convert a string to lower-case
+// Trim the starting white space of a string
+external trim-left : (s : string) -> string {
+  cs inline "(#1).TrimStart()";
+  js inline "((#1).replace(/^\\s\\s*/,''))";
+}
+// Trim the ending white space of a string.
+external trim-right : (s : string) -> string {
+  cs inline "(#1).TrimEnd()";
+  js inline "((#1).replace(/\\s+$/,''))";
+}
+// Return the element at position `index`  in vector `v` . Raise an out of bounds exception if `index < 0`  or `index >= v.length` .
+// Return the element at position `index`  in vector `v` . Raise an out of bounds exception if `index < 0`  or `index >= v.length` .
+external [] : forall<a> (v : (vector :: V -> V)<a>, index : int) -> <(exn :: X)> a {
+  cs inline "(#1)[Primitive.IntToInt32(#2)]";
+  js inline "$std_core._vector_at(#1,#2)";
+}
+// Create a new vector of length `n`  with initial elements given by function `f` .
+// Create an empty vector.
+external vector : forall<a> () -> (vector :: V -> V)<a> {
+  cs inline "new ##1[0]";
+  js inline "[]";
+}
+// Convert a vector to a list with an optional tail.
+// Convert a list to a vector.
+// Generic show: shows the internal representation of an object as a string
+// Note: this breaks parametricity so it should not be public
+// Generic formatting
+// Print a string to the console, including a final newline character.
+// Print a string to the console
+// Used by the compiler to wrap main console applications
+// Allocate a fresh reference with an initial value.
+external ref : forall<(h :: H),a> (value : a) -> <(alloc :: H -> X)<(h :: H)>> (ref :: (H, V) -> V)<(h :: H),a> {
+  cs inline "new Ref<##1,##2>(#1)";
+  js inline "{ value: #1 }";
+}
+// Assign a new value to a reference.
+external set : forall<(h :: H),a> (ref : (ref :: (H, V) -> V)<(h :: H),a>, assigned : a) -> <(write :: H -> X)<(h :: H)>> () {
+  cs inline "#1.Set(#2)";
+  js inline "((#1).value = #2)";
+}
+// Read the value of reference.
+external (!) .1 : forall<(h :: H),a,(e :: E)> (ref : (ref :: (H, V) -> V)<(h :: H),a>) -> <(read :: H -> X)<(h :: H)>|(e :: E)> a with hdiv<(h :: H),a,(e :: E)> {
+  cs inline "#1.Value";
+  js inline "((#1).value)";
+}
+// If a heap effect is unobservable, the heap effect can be erased by using the `run` fun.
+// See also: _State in Haskell, by Simon Peyton Jones and John Launchbury_.
+external run : forall<(e :: E),a> (action : forall<(h :: H)> () -> <(st :: H -> E)<(h :: H)>|(e :: E)> a) -> (e :: E) a {
+  cs inline "Primitive.Run<##2>(#1)";
+  js inline "((#1)())";
+}
+// _Unsafe_. Mark a function parameter as decreasing to suppress the non-termination effect (`:div`).
+external unsafe-decreasing : forall<a> (x : a) -> a = inline "#1";
+// Return a random number equal or larger than 0.0 and smaller than 1.0
+// Return a positive random integer (including 0)
+// Return the host environment: `dotnet`, `browser`, `webworker`, or `node`.
+external (.inject-effect) : forall<a,(e :: E),(e1 :: E)> (effect-name : string, action : () -> (e :: E) a) -> (e1 :: E) a {
+  js inline "$std_core._handle_inject(#1,0,#2)";
+}
+external (.inject-resource) : forall<a,(e :: E)> (effect-name : string, resource-tag : int, action : () -> (e :: E) a) -> (e :: E) a {
+  js inline "$std_core._handle_inject(#1,#2,#3)";
+}
+external bind : forall<a,b,(e :: E)> (x : (yld :: V -> V)<a>, next : (a) -> (e :: E) (yld :: V -> V)<b>) -> (e :: E) (yld :: V -> V)<b> {
+  cs inline "Eff.Op.Bind<##1,##2>(#1,#2)";
+  js inline "$std_core._bind(#1,#2)";
+}
+// Used for handlers with just a `return` branch
+// Used for handlers with just a `return` branch
+// .open is used in the compiler to open up closed effects.
+// Usually simplified away but still present if --no-simplify flag is given
+external (.open) : forall<a,b> (x : a) -> (total :: E) b = inline "#1";
+// Magic casting to the `:any` type.
+external (.toany) : forall<a> (x : a) -> any {
+  inline "#1";
+  cs inline "(object)(#1)";
+}

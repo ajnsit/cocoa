@@ -1,0 +1,14 @@
+module interface interactive
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+import std/core = std/core = "";
+import concur = concur = "";
+// Stateful funs can manipulate heap `:h` using allocations, reads and writes.
+private alias std/core/st<(h :: H)> :: H -> E = <(std/core/read :: H -> X)<(h :: H)>,(std/core/write :: H -> X)<(h :: H)>,(std/core/alloc :: H -> X)<(h :: H)>> = 1;
+// An alias for pure effects: a pure function always returns the same result
+// when called with the same arguments but may not terminate or raise an exception.
+private alias std/core/pure :: E = <(std/core/exn :: X),(std/core/div :: X)> = 1;
+fun (.expr) : () -> <(std/core/st :: H -> E)<(sys/dom/types/hdom :: H)>,(std/core/pure :: E),(std/core/ui :: X),(std/core/net :: X),(std/core/console :: X),(std/core/ndet :: X)> ();

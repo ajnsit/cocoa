@@ -1,0 +1,26 @@
+/* Props
+*/
+module interface concur/props
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+import std/core = std/core = "";
+type prop ;
+// immutable props
+type props <a> :: V -> V ;
+// Index into props
+fun [] : forall<a> (p : (props :: V -> V)<a>, s : std/core/string) -> (std/core/maybe :: V -> V)<a>;
+/* Handler with no args */
+fun mkHandler0 : forall<(e :: E)> (() -> (e :: E) ()) -> prop;
+// Create a prop
+fun props : forall<a> () -> (props :: V -> V)<a>;
+// Create new props from a `:list` of key value pairs.
+fun props .1 : forall<a> (elems : (std/core/list :: V -> V)<(std/core/string, a)>) -> (props :: V -> V)<a>;
+// Create a prop
+external contains-key : forall<a> (p : (props :: V -> V)<a>, s : std/core/string) -> std/core/bool {
+  js inline "((#1)[#2]!==undefined)";
+}
+// Create new props from a `:list` of key value pairs.
+/* Handler with no args */

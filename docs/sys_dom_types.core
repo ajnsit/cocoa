@@ -1,0 +1,1999 @@
+// Basic types of the HTML5 DOM model
+module sys/dom/types
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+import std/core = std/core = "";
+// Stateful funs can manipulate heap `:h` using allocations, reads and writes.
+private alias st<(h :: H)> :: H -> E = <(read :: H -> X)<(h :: H)>,(write :: H -> X)<(h :: H)>,(alloc :: H -> X)<(h :: H)>> = 1;
+/* Effect primitives */
+type hdom :: H ;
+alias dom :: E = <(exn :: X),(ndet :: X),(console :: X),(net :: X),(ui :: X),((st :: H -> E)<(hdom :: H)> == 1 <(read :: H -> X)<(hdom :: H)>,(write :: H -> X)<(hdom :: H)>,(alloc :: H -> X)<(hdom :: H)>>)> = 2;
+alias abstractView = any = 1;
+// used in `initMessageEvent` and `postMessage`
+type anonXmlHttpRequest ;
+type applicationCache ;
+/* Enum declarations */
+type applicationCacheStatus {
+  con UNCACHED : applicationCacheStatus;
+  con IDLE : applicationCacheStatus;
+  con CHECKING : applicationCacheStatus;
+  con DOWNLOADING : applicationCacheStatus;
+  con UPDATEREADY : applicationCacheStatus;
+  con OBSOLETE : applicationCacheStatus;
+};
+type arrayBuffer ;
+type arrayBufferView ;
+type attr ;
+type audioTrack ;
+type audioTrackList ;
+type barProp ;
+type beforeUnloadEvent ;
+type blob ;
+type blobCallback ;
+type booleanArray ;
+type byteArray ;
+type canvasGradient ;
+type canvasPattern ;
+type canvasPixelArray ;
+type canvasRenderingContext2d ;
+type caretPosition ;
+type characterData ;
+type clientRect ;
+type clientRectList ;
+type comment ;
+type compositionEvent ;
+type counter ;
+type css2Properties ;
+type cssCharsetRule ;
+type cssColorComponentValue ;
+type cssComponentValue ;
+type cssFontFaceRule ;
+type cssIdentifierComponentValue ;
+type cssImportRule ;
+type cssKeywordComponentValue ;
+type cssLengthComponentValue ;
+type cssMapValue ;
+type cssMediaRule ;
+type cssNamespaceRule ;
+type cssPageRule ;
+type cssPercentageComponentValue ;
+type cssPrimitiveType {
+  con CSS_UNKNOWN : cssPrimitiveType;
+  con CSS_NUMBER : cssPrimitiveType;
+  con CSS_PERCENTAGE : cssPrimitiveType;
+  con CSS_EMS : cssPrimitiveType;
+  con CSS_EXS : cssPrimitiveType;
+  con CSS_PX : cssPrimitiveType;
+  con CSS_CM : cssPrimitiveType;
+  con CSS_MM : cssPrimitiveType;
+  con CSS_IN : cssPrimitiveType;
+  con CSS_PT : cssPrimitiveType;
+  con CSS_PC : cssPrimitiveType;
+  con CSS_DEG : cssPrimitiveType;
+  con CSS_RAD : cssPrimitiveType;
+  con CSS_GRAD : cssPrimitiveType;
+  con CSS_MS : cssPrimitiveType;
+  con CSS_S : cssPrimitiveType;
+  con CSS_HZ : cssPrimitiveType;
+  con CSS_KHZ : cssPrimitiveType;
+  con CSS_DIMENSION : cssPrimitiveType;
+  con CSS_STRING : cssPrimitiveType;
+  con CSS_URI : cssPrimitiveType;
+  con CSS_IDENT : cssPrimitiveType;
+  con CSS_ATTR : cssPrimitiveType;
+  con CSS_COUNTER : cssPrimitiveType;
+  con CSS_RECT : cssPrimitiveType;
+  con CSS_RGBCOLOR : cssPrimitiveType;
+  con CSS_UNICODE_RANGE : cssPrimitiveType;
+};
+type cssPrimitiveValue ;
+type cssPropertyValue ;
+type cssPropertyValueList ;
+type cssRule ;
+type cssRuleType {
+  con STYLE_RULE : cssRuleType;
+  con IMPORT_RULE : cssRuleType;
+  con MEDIA_RULE : cssRuleType;
+  con FONT_FACE_RULE : cssRuleType;
+  con PAGE_RULE : cssRuleType;
+  con NAMESPACE_RULE : cssRuleType;
+};
+type cssStringComponentValue ;
+type cssStyleDeclaration ;
+type cssStyleDeclarationValue ;
+type cssStyleRule ;
+type cssStyleSheet ;
+type cssUnknownRule ;
+type cssUrlComponentValue ;
+type cssValue ;
+type cssValueList ;
+type cssValueType {
+  con CSS_INHERIT : cssValueType;
+  con CSS_PRIMITIVE_VALUE : cssValueType;
+  con CSS_VALUE_LIST : cssValueType;
+  con CSS_CUSTOM : cssValueType;
+};
+type customEvent ;
+type customEventInit ;
+type dataTransfer ;
+type dataTransferItem ;
+type dataTransferItemList ;
+type dataView ;
+/* Type aliases */
+type date ;
+type document ;
+type documentCss ;
+type documentFragment ;
+type documentPosition {
+  con DOCUMENT_POSITION_DISCONNECTED : documentPosition;
+  con DOCUMENT_POSITION_PRECEDING : documentPosition;
+  con DOCUMENT_POSITION_FOLLOWING : documentPosition;
+  con DOCUMENT_POSITION_CONTAINS : documentPosition;
+  con DOCUMENT_POSITION_CONTAINED_BY : documentPosition;
+  con DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC : documentPosition;
+};
+type documentRange ;
+type documentTraversal ;
+type documentType ;
+type domElementMap ;
+type domException {
+  con INDEX_SIZE_ERR : domException;
+  con DOMSTRING_SIZE_ERR : domException;
+  con HIERARCHY_REQUEST_ERR : domException;
+  con WRONG_DOCUMENT_ERR : domException;
+  con INVALID_CHARACTER_ERR : domException;
+  con NO_DATA_ALLOWED_ERR : domException;
+  con NO_MODIFICATION_ALLOWED_ERR : domException;
+  con NOT_FOUND_ERR : domException;
+  con NOT_SUPPORTED_ERR : domException;
+  con INUSE_ATTRIBUTE_ERR : domException;
+  con INVALID_STATE_ERR : domException;
+  con SYNTAX_ERR : domException;
+  con INVALID_MODIFICATION_ERR : domException;
+  con NAMESPACE_ERR : domException;
+  con INVALID_ACCESS_ERR : domException;
+  con VALIDATION_ERR : domException;
+  con TYPE_MISMATCH_ERR : domException;
+  con SECURITY_ERR : domException;
+  con NETWORK_ERR : domException;
+  con ABORT_ERR : domException;
+  con URL_MISMATCH_ERR : domException;
+  con QUOTA_EXCEEDED_ERR : domException;
+  con TIMEOUT_ERR : domException;
+  con INVALID_NODE_TYPE_ERR : domException;
+  con DATA_CLONE_ERR : domException;
+};
+type domImplementation ;
+type domImplementationCss ;
+type domSettableTokenList ;
+type domStringList ;
+type domStringMap ;
+alias domTimeStamp = date = 1;
+type domTokenList ;
+type doubleArray ;
+type dragEvent ;
+type element ;
+type elementCssInlineStyle ;
+type event ;
+type eventExceptionCode {
+  con UNSPECIFIED_EVENT_TYPE_ERR : eventExceptionCode;
+  con DISPATCH_REQUEST_ERR : eventExceptionCode;
+};
+type eventInit ;
+type eventListener ;
+type eventPhase {
+  con CAPTURING_PHASE : eventPhase;
+  con AT_TARGET : eventPhase;
+  con BUBBLING_PHASE : eventPhase;
+};
+type eventSource ;
+type eventSourceReadyState {
+  con CONNECTING : eventSourceReadyState;
+  con OPEN : eventSourceReadyState;
+  con CLOSED : eventSourceReadyState;
+};
+type eventTarget ;
+type external_ ;
+type file ;
+type fileCallback ;
+type fileError ;
+type fileErrorCode {
+  con FILE__NOT_FOUND_ERR : fileErrorCode;
+  con FILE__SECURITY_ERR : fileErrorCode;
+  con FILE__ABORT_ERR : fileErrorCode;
+  con FILE__NOT_READABLE_ERR : fileErrorCode;
+  con FILE__ENCODING_ERR : fileErrorCode;
+};
+type fileExceptionCode {
+  con FILE_NOT_FOUND_ERR : fileExceptionCode;
+  con FILE_SECURITY_ERR : fileExceptionCode;
+  con FILE_ABORT_ERR : fileExceptionCode;
+  con FILE_NOT_READABLE_ERR : fileExceptionCode;
+  con FILE_ENCODING_ERR : fileExceptionCode;
+  con BYTES_PER_ELEMENT : fileExceptionCode;
+};
+type fileList ;
+type fileReader ;
+type fileReaderReadyState {
+  con FILE_READER_EMPTY : fileReaderReadyState;
+  con FILE_READER_LOADING : fileReaderReadyState;
+  con FILE_READER_DONE : fileReaderReadyState;
+};
+type fileReaderSync ;
+alias float32 = double = 1;
+type float32Array ;
+alias float64 = double = 1;
+type float64Array ;
+type floatArray ;
+type focusEvent ;
+type formData ;
+type functionStringCallback ;
+type hashChangeEvent ;
+type history ;
+type htmlAllCollection ;
+type htmlAnchorElement ;
+type htmlAppletElement ;
+type htmlAreaElement ;
+type htmlAudioElement ;
+type htmlBaseElement ;
+type htmlBaseFontElement ;
+type htmlBodyElement ;
+type htmlBrElement ;
+type htmlButtonElement ;
+type htmlCanvasElement ;
+type htmlCollection ;
+type htmlCommandElement ;
+type htmlDataListElement ;
+type htmlDetailsElement ;
+type htmlDirectoryElement ;
+type htmlDivElement ;
+type htmlDListElement ;
+type htmlDocument ;
+type htmlElement ;
+type htmlEmbedElement ;
+type htmlFieldSetElement ;
+type htmlFontElement ;
+type htmlFormControlsCollection ;
+type htmlFormElement ;
+type htmlFrameElement ;
+type htmlFrameSetElement ;
+type htmlHeadElement ;
+type htmlHeadingElement ;
+type htmlHrElement ;
+type htmlHtmlElement ;
+type htmlIframeElement ;
+type htmlImageElement ;
+type htmlInputElement ;
+type htmlKeygenElement ;
+type htmlLabelElement ;
+type htmlLegendElement ;
+type htmlLiElement ;
+type htmlLinkElement ;
+type htmlMapElement ;
+type htmlMarqueeElement ;
+type htmlMediaElement ;
+type htmlMenuElement ;
+type htmlMetaElement ;
+type htmlMeterElement ;
+type htmlModElement ;
+type htmlObjectElement ;
+type htmlOListElement ;
+type htmlOptGroupElement ;
+type htmlOptionElement ;
+type htmlOptionsCollection ;
+type htmlOutputElement ;
+type htmlParagraphElement ;
+type htmlParamElement ;
+type htmlPreElement ;
+type htmlProgressElement ;
+type htmlPropertiesCollection ;
+type htmlQuoteElement ;
+type htmlScriptElement ;
+type htmlSelectElement ;
+type htmlSourceElement ;
+type htmlSpanElement ;
+type htmlStyleElement ;
+type htmlTableCaptionElement ;
+type htmlTableCellElement ;
+type htmlTableColElement ;
+type htmlTableDataCellElement ;
+type htmlTableElement ;
+type htmlTableHeaderCellElement ;
+type htmlTableRowElement ;
+type htmlTableSectionElement ;
+type htmlTextAreaElement ;
+type htmlTimeElement ;
+type htmlTitleElement ;
+type htmlTrackElement ;
+type htmlUListElement ;
+type htmlUnknownElement ;
+type htmlVideoElement ;
+type imageData ;
+alias int16 = int = 1;
+type int16Array ;
+alias int32 = int = 1;
+type int32Array ;
+alias int8 = int = 1;
+type int8Array ;
+type keyboardEvent ;
+type keyboardEventLocation {
+  con DOM_KEY_LOCATION_STANDARD : keyboardEventLocation;
+  con DOM_KEY_LOCATION_LEFT : keyboardEventLocation;
+  con DOM_KEY_LOCATION_RIGHT : keyboardEventLocation;
+  con DOM_KEY_LOCATION_NUMPAD : keyboardEventLocation;
+  con DOM_KEY_LOCATION_MOBILE : keyboardEventLocation;
+  con DOM_KEY_LOCATION_JOYSTICK : keyboardEventLocation;
+};
+type linkStyle ;
+type localMediaStream ;
+type location ;
+type longArray ;
+type longLongArray ;
+type mediaController ;
+type mediaError ;
+type mediaErrorCode {
+  con MEDIA_ERR_ABORTED : mediaErrorCode;
+  con MEDIA_ERR_NETWORK : mediaErrorCode;
+  con MEDIA_ERR_DECODE : mediaErrorCode;
+  con MEDIA_ERR_SRC_NOT_SUPPORTED : mediaErrorCode;
+};
+type mediaList ;
+type mediaQueryList ;
+type mediaQueryListListener ;
+type mediaReadyState {
+  con HAVE_NOTHING : mediaReadyState;
+  con HAVE_METADATA : mediaReadyState;
+  con HAVE_CURRENT_DATA : mediaReadyState;
+  con HAVE_FUTURE_DATA : mediaReadyState;
+  con HAVE_ENOUGH_DATA : mediaReadyState;
+};
+type mediaStream ;
+type mediaStreamReadyState {
+  con LIVE : mediaStreamReadyState;
+  con ENDED : mediaStreamReadyState;
+};
+type mediaStreamRecorder ;
+type messageChannel ;
+type messageEvent ;
+type messagePort ;
+alias milliseconds = int = 1;
+type mouseEvent ;
+type mutableTextTrack ;
+type mutationEvent ;
+type mutationEventAttrChange {
+  con MODIFICATION : mutationEventAttrChange;
+  con ADDITION : mutationEventAttrChange;
+  con REMOVAL : mutationEventAttrChange;
+};
+type mutationNameEvent ;
+type navigator ;
+type navigatorUserMediaError ;
+type navigatorUserMediaErrorCallback ;
+type navigatorUserMediaErrorCode {
+  con PERMISSION_DENIED : navigatorUserMediaErrorCode;
+};
+type navigatorUserMediaSuccessCallback ;
+type networkState {
+  con NETWORK_EMPTY : networkState;
+  con NETWORK_IDLE : networkState;
+  con NETWORK_LOADING : networkState;
+  con NETWORK_NO_SOURCE : networkState;
+};
+type node ;
+type nodeFilter ;
+type nodeFilterAcceptCode {
+  con FILTER_ACCEPT : nodeFilterAcceptCode;
+  con FILTER_REJECT : nodeFilterAcceptCode;
+  con FILTER_SKIP : nodeFilterAcceptCode;
+};
+type nodeFilterSelectCode {
+  con SHOW_ALL : nodeFilterSelectCode;
+  con SHOW_ELEMENT : nodeFilterSelectCode;
+  con SHOW_ATTRIBUTE : nodeFilterSelectCode;
+  con SHOW_TEXT : nodeFilterSelectCode;
+  con SHOW_CDATA_SECTION : nodeFilterSelectCode;
+  con SHOW_ENTITY_REFERENCE : nodeFilterSelectCode;
+  con SHOW_ENTITY : nodeFilterSelectCode;
+  con SHOW_PROCESSING_INSTRUCTION : nodeFilterSelectCode;
+  con SHOW_COMMENT : nodeFilterSelectCode;
+  con SHOW_DOCUMENT : nodeFilterSelectCode;
+  con SHOW_DOCUMENT_TYPE : nodeFilterSelectCode;
+  con SHOW_DOCUMENT_FRAGMENT : nodeFilterSelectCode;
+  con SHOW_NOTATION : nodeFilterSelectCode;
+};
+type nodeIterator ;
+type nodeList ;
+type nodeType {
+  con ELEMENT_NODE : nodeType;
+  con ATTRIBUTE_NODE : nodeType;
+  con TEXT_NODE : nodeType;
+  con CDATA_SECTION_NODE : nodeType;
+  con ENTITY_REFERENCE_NODE : nodeType;
+  con ENTITY_NODE : nodeType;
+  con PROCESSING_INSTRUCTION_NODE : nodeType;
+  con COMMENT_NODE : nodeType;
+  con DOCUMENT_NODE : nodeType;
+  con DOCUMENT_TYPE_NODE : nodeType;
+  con DOCUMENT_FRAGMENT_NODE : nodeType;
+  con NOTATION_NODE : nodeType;
+};
+type octetArray ;
+type pageTransitionEvent ;
+type peerConnection ;
+type peerConnectionReadyState {
+  con PEER_CONNECTION_NEW : peerConnectionReadyState;
+  con PEER_CONNECTION_NEGOTIATING : peerConnectionReadyState;
+  con PEER_CONNECTION_ACTIVE : peerConnectionReadyState;
+  con PEER_CONNECTION_CLOSED : peerConnectionReadyState;
+};
+type popStateEvent ;
+type processingInstruction ;
+type progressEvent ;
+type propertyNodeList ;
+type radioNodeList ;
+type range ;
+type rangeExceptionCode {
+  con RANGE_BAD_BOUNDARYPOINTS_ERR : rangeExceptionCode;
+  con RANGE_INVALID_NODE_TYPE_ERR : rangeExceptionCode;
+};
+type rangeExceptionCompareHow {
+  con START_TO_START : rangeExceptionCompareHow;
+  con START_TO_END : rangeExceptionCompareHow;
+  con END_TO_END : rangeExceptionCompareHow;
+  con END_TO_START : rangeExceptionCompareHow;
+};
+type rect ;
+type rgbColor ;
+type screen ;
+type seqence ;
+type shortArray ;
+type signalingCallback ;
+type streamEvent ;
+type streamTrack ;
+type styleSheet ;
+/* Abstract type declarations for interfaces */
+type styleSheetList ;
+type text ;
+type textEvent ;
+type textEventInputMethod {
+  con DOM_INPUT_METHOD_UNKNOWN : textEventInputMethod;
+  con DOM_INPUT_METHOD_KEYBOARD : textEventInputMethod;
+  con DOM_INPUT_METHOD_PASTE : textEventInputMethod;
+  con DOM_INPUT_METHOD_DROP : textEventInputMethod;
+  con DOM_INPUT_METHOD_IME : textEventInputMethod;
+  con DOM_INPUT_METHOD_OPTION : textEventInputMethod;
+  con DOM_INPUT_METHOD_HANDWRITING : textEventInputMethod;
+  con DOM_INPUT_METHOD_VOICE : textEventInputMethod;
+  con DOM_INPUT_METHOD_MULTIMODAL : textEventInputMethod;
+  con DOM_INPUT_METHOD_SCRIPT : textEventInputMethod;
+};
+type textMetrics ;
+type textTrack ;
+type textTrackCue ;
+type textTrackCueList ;
+type textTrackMode {
+  con TEXT_TRACK_OFF : textTrackMode;
+  con TEXT_TRACK_HIDDEN : textTrackMode;
+  con TEXT_TRACK_SHOWING : textTrackMode;
+};
+type textTrackReadyState {
+  con TEXT_TRACK_NONE : textTrackReadyState;
+  con TEXT_TRACK_LOADING : textTrackReadyState;
+  con TEXT_TRACK_LOADED : textTrackReadyState;
+  con TEXT_TRACK_ERROR : textTrackReadyState;
+};
+type timeRanges ;
+alias timestamp = date = 1;
+type transferable ;
+type treeWalker ;
+type uiEvent ;
+alias uint16 = int = 1;
+type uint16Array ;
+alias uint32 = int = 1;
+type uint32Array ;
+alias uint8 = int = 1;
+type uint8Array ;
+type undoManager ;
+type undoManagerEvent ;
+type unsignedByteArray ;
+type unsignedLongArray ;
+type unsignedLongLongArray ;
+type unsignedShortArray ;
+type validityState ;
+type videoTrack ;
+type videoTrackList ;
+type wheelEvent ;
+type wheelEventDeltaMode {
+  con DOM_DELTA_PIXEL : wheelEventDeltaMode;
+  con DOM_DELTA_LINE : wheelEventDeltaMode;
+  con DOM_DELTA_PAGE : wheelEventDeltaMode;
+};
+type window ;
+type windowBase64 ;
+type windowModal ;
+type windowProxy ;
+alias windowTimers = window = 1;
+type xmlHttpRequest ;
+type xmlHttpRequestEventTarget ;
+type xmlHttpRequestReadyState {
+  con UNSENT : xmlHttpRequestReadyState;
+  con OPENED : xmlHttpRequestReadyState;
+  con HEADERS_RECEIVED : xmlHttpRequestReadyState;
+  con LOADING : xmlHttpRequestReadyState;
+  con DONE : xmlHttpRequestReadyState;
+};
+type xmlHttpRequestUpload ;
+// Automatically generated. Tests for the `UNCACHED` constructor of the `:applicationCacheStatus` type.
+public fun uncached? : (applicationCacheStatus : applicationCacheStatus) -> bool
+  = fun(applicationCacheStatus:applicationCacheStatus){
+    match (applicationCacheStatus) {
+      sys/dom/types/UNCACHED() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `IDLE` constructor of the `:applicationCacheStatus` type.
+public fun idle? : (applicationCacheStatus : applicationCacheStatus) -> bool
+  = fun(applicationCacheStatus:applicationCacheStatus){
+    match (applicationCacheStatus) {
+      sys/dom/types/IDLE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CHECKING` constructor of the `:applicationCacheStatus` type.
+public fun checking? : (applicationCacheStatus : applicationCacheStatus) -> bool
+  = fun(applicationCacheStatus:applicationCacheStatus){
+    match (applicationCacheStatus) {
+      sys/dom/types/CHECKING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOWNLOADING` constructor of the `:applicationCacheStatus` type.
+public fun downloading? : (applicationCacheStatus : applicationCacheStatus) -> bool
+  = fun(applicationCacheStatus:applicationCacheStatus){
+    match (applicationCacheStatus) {
+      sys/dom/types/DOWNLOADING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `UPDATEREADY` constructor of the `:applicationCacheStatus` type.
+public fun updateready? : (applicationCacheStatus : applicationCacheStatus) -> bool
+  = fun(applicationCacheStatus:applicationCacheStatus){
+    match (applicationCacheStatus) {
+      sys/dom/types/UPDATEREADY() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `OBSOLETE` constructor of the `:applicationCacheStatus` type.
+public fun obsolete? : (applicationCacheStatus : applicationCacheStatus) -> bool
+  = fun(applicationCacheStatus:applicationCacheStatus){
+    match (applicationCacheStatus) {
+      sys/dom/types/OBSOLETE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_UNKNOWN` constructor of the `:cssPrimitiveType` type.
+public fun css_UNKNOWN? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_UNKNOWN() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_NUMBER` constructor of the `:cssPrimitiveType` type.
+public fun css_NUMBER? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_NUMBER() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_PERCENTAGE` constructor of the `:cssPrimitiveType` type.
+public fun css_PERCENTAGE? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_PERCENTAGE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_EMS` constructor of the `:cssPrimitiveType` type.
+public fun css_EMS? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_EMS() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_EXS` constructor of the `:cssPrimitiveType` type.
+public fun css_EXS? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_EXS() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_PX` constructor of the `:cssPrimitiveType` type.
+public fun css_PX? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_PX() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_CM` constructor of the `:cssPrimitiveType` type.
+public fun css_CM? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_CM() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_MM` constructor of the `:cssPrimitiveType` type.
+public fun css_MM? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_MM() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_IN` constructor of the `:cssPrimitiveType` type.
+public fun css_IN? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_IN() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_PT` constructor of the `:cssPrimitiveType` type.
+public fun css_PT? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_PT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_PC` constructor of the `:cssPrimitiveType` type.
+public fun css_PC? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_PC() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_DEG` constructor of the `:cssPrimitiveType` type.
+public fun css_DEG? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_DEG() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_RAD` constructor of the `:cssPrimitiveType` type.
+public fun css_RAD? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_RAD() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_GRAD` constructor of the `:cssPrimitiveType` type.
+public fun css_GRAD? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_GRAD() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_MS` constructor of the `:cssPrimitiveType` type.
+public fun css_MS? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_MS() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_S` constructor of the `:cssPrimitiveType` type.
+public fun css_S? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_S() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_HZ` constructor of the `:cssPrimitiveType` type.
+public fun css_HZ? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_HZ() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_KHZ` constructor of the `:cssPrimitiveType` type.
+public fun css_KHZ? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_KHZ() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_DIMENSION` constructor of the `:cssPrimitiveType` type.
+public fun css_DIMENSION? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_DIMENSION() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_STRING` constructor of the `:cssPrimitiveType` type.
+public fun css_STRING? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_STRING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_URI` constructor of the `:cssPrimitiveType` type.
+public fun css_URI? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_URI() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_IDENT` constructor of the `:cssPrimitiveType` type.
+public fun css_IDENT? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_IDENT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_ATTR` constructor of the `:cssPrimitiveType` type.
+public fun css_ATTR? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_ATTR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_COUNTER` constructor of the `:cssPrimitiveType` type.
+public fun css_COUNTER? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_COUNTER() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_RECT` constructor of the `:cssPrimitiveType` type.
+public fun css_RECT? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_RECT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_RGBCOLOR` constructor of the `:cssPrimitiveType` type.
+public fun css_RGBCOLOR? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_RGBCOLOR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_UNICODE_RANGE` constructor of the `:cssPrimitiveType` type.
+public fun css_UNICODE_RANGE? : (cssPrimitiveType : cssPrimitiveType) -> bool
+  = fun(cssPrimitiveType:cssPrimitiveType){
+    match (cssPrimitiveType) {
+      sys/dom/types/CSS_UNICODE_RANGE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `STYLE_RULE` constructor of the `:cssRuleType` type.
+public fun style_RULE? : (cssRuleType : cssRuleType) -> bool
+  = fun(cssRuleType:cssRuleType){
+    match (cssRuleType) {
+      sys/dom/types/STYLE_RULE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `IMPORT_RULE` constructor of the `:cssRuleType` type.
+public fun import_RULE? : (cssRuleType : cssRuleType) -> bool
+  = fun(cssRuleType:cssRuleType){
+    match (cssRuleType) {
+      sys/dom/types/IMPORT_RULE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `MEDIA_RULE` constructor of the `:cssRuleType` type.
+public fun media_RULE? : (cssRuleType : cssRuleType) -> bool
+  = fun(cssRuleType:cssRuleType){
+    match (cssRuleType) {
+      sys/dom/types/MEDIA_RULE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FONT_FACE_RULE` constructor of the `:cssRuleType` type.
+public fun font_FACE_RULE? : (cssRuleType : cssRuleType) -> bool
+  = fun(cssRuleType:cssRuleType){
+    match (cssRuleType) {
+      sys/dom/types/FONT_FACE_RULE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `PAGE_RULE` constructor of the `:cssRuleType` type.
+public fun page_RULE? : (cssRuleType : cssRuleType) -> bool
+  = fun(cssRuleType:cssRuleType){
+    match (cssRuleType) {
+      sys/dom/types/PAGE_RULE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `NAMESPACE_RULE` constructor of the `:cssRuleType` type.
+public fun namespace_RULE? : (cssRuleType : cssRuleType) -> bool
+  = fun(cssRuleType:cssRuleType){
+    match (cssRuleType) {
+      sys/dom/types/NAMESPACE_RULE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_INHERIT` constructor of the `:cssValueType` type.
+public fun css_INHERIT? : (cssValueType : cssValueType) -> bool
+  = fun(cssValueType:cssValueType){
+    match (cssValueType) {
+      sys/dom/types/CSS_INHERIT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_PRIMITIVE_VALUE` constructor of the `:cssValueType` type.
+public fun css_PRIMITIVE_VALUE? : (cssValueType : cssValueType) -> bool
+  = fun(cssValueType:cssValueType){
+    match (cssValueType) {
+      sys/dom/types/CSS_PRIMITIVE_VALUE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_VALUE_LIST` constructor of the `:cssValueType` type.
+public fun css_VALUE_LIST? : (cssValueType : cssValueType) -> bool
+  = fun(cssValueType:cssValueType){
+    match (cssValueType) {
+      sys/dom/types/CSS_VALUE_LIST() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CSS_CUSTOM` constructor of the `:cssValueType` type.
+public fun css_CUSTOM? : (cssValueType : cssValueType) -> bool
+  = fun(cssValueType:cssValueType){
+    match (cssValueType) {
+      sys/dom/types/CSS_CUSTOM() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOCUMENT_POSITION_DISCONNECTED` constructor of the `:documentPosition` type.
+public fun document_POSITION_DISCONNECTED? : (documentPosition : documentPosition) -> bool
+  = fun(documentPosition:documentPosition){
+    match (documentPosition) {
+      sys/dom/types/DOCUMENT_POSITION_DISCONNECTED() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOCUMENT_POSITION_PRECEDING` constructor of the `:documentPosition` type.
+public fun document_POSITION_PRECEDING? : (documentPosition : documentPosition) -> bool
+  = fun(documentPosition:documentPosition){
+    match (documentPosition) {
+      sys/dom/types/DOCUMENT_POSITION_PRECEDING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOCUMENT_POSITION_FOLLOWING` constructor of the `:documentPosition` type.
+public fun document_POSITION_FOLLOWING? : (documentPosition : documentPosition) -> bool
+  = fun(documentPosition:documentPosition){
+    match (documentPosition) {
+      sys/dom/types/DOCUMENT_POSITION_FOLLOWING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOCUMENT_POSITION_CONTAINS` constructor of the `:documentPosition` type.
+public fun document_POSITION_CONTAINS? : (documentPosition : documentPosition) -> bool
+  = fun(documentPosition:documentPosition){
+    match (documentPosition) {
+      sys/dom/types/DOCUMENT_POSITION_CONTAINS() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOCUMENT_POSITION_CONTAINED_BY` constructor of the `:documentPosition` type.
+public fun document_POSITION_CONTAINED_BY? : (documentPosition : documentPosition) -> bool
+  = fun(documentPosition:documentPosition){
+    match (documentPosition) {
+      sys/dom/types/DOCUMENT_POSITION_CONTAINED_BY() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC` constructor of the `:documentPosition` type.
+public fun document_POSITION_IMPLEMENTATION_SPECIFIC? : (documentPosition : documentPosition) -> bool
+  = fun(documentPosition:documentPosition){
+    match (documentPosition) {
+      sys/dom/types/DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `INDEX_SIZE_ERR` constructor of the `:domException` type.
+public fun index_SIZE_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/INDEX_SIZE_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOMSTRING_SIZE_ERR` constructor of the `:domException` type.
+public fun domstring_SIZE_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/DOMSTRING_SIZE_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `HIERARCHY_REQUEST_ERR` constructor of the `:domException` type.
+public fun hierarchy_REQUEST_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/HIERARCHY_REQUEST_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `WRONG_DOCUMENT_ERR` constructor of the `:domException` type.
+public fun wrong_DOCUMENT_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/WRONG_DOCUMENT_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `INVALID_CHARACTER_ERR` constructor of the `:domException` type.
+public fun invalid_CHARACTER_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/INVALID_CHARACTER_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `NO_DATA_ALLOWED_ERR` constructor of the `:domException` type.
+public fun no_DATA_ALLOWED_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/NO_DATA_ALLOWED_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `NO_MODIFICATION_ALLOWED_ERR` constructor of the `:domException` type.
+public fun no_MODIFICATION_ALLOWED_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/NO_MODIFICATION_ALLOWED_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `NOT_FOUND_ERR` constructor of the `:domException` type.
+public fun not_FOUND_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/NOT_FOUND_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `NOT_SUPPORTED_ERR` constructor of the `:domException` type.
+public fun not_SUPPORTED_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/NOT_SUPPORTED_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `INUSE_ATTRIBUTE_ERR` constructor of the `:domException` type.
+public fun inuse_ATTRIBUTE_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/INUSE_ATTRIBUTE_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `INVALID_STATE_ERR` constructor of the `:domException` type.
+public fun invalid_STATE_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/INVALID_STATE_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SYNTAX_ERR` constructor of the `:domException` type.
+public fun syntax_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/SYNTAX_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `INVALID_MODIFICATION_ERR` constructor of the `:domException` type.
+public fun invalid_MODIFICATION_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/INVALID_MODIFICATION_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `NAMESPACE_ERR` constructor of the `:domException` type.
+public fun namespace_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/NAMESPACE_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `INVALID_ACCESS_ERR` constructor of the `:domException` type.
+public fun invalid_ACCESS_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/INVALID_ACCESS_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `VALIDATION_ERR` constructor of the `:domException` type.
+public fun validation_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/VALIDATION_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `TYPE_MISMATCH_ERR` constructor of the `:domException` type.
+public fun type_MISMATCH_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/TYPE_MISMATCH_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SECURITY_ERR` constructor of the `:domException` type.
+public fun security_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/SECURITY_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `NETWORK_ERR` constructor of the `:domException` type.
+public fun network_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/NETWORK_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `ABORT_ERR` constructor of the `:domException` type.
+public fun abort_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/ABORT_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `URL_MISMATCH_ERR` constructor of the `:domException` type.
+public fun url_MISMATCH_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/URL_MISMATCH_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `QUOTA_EXCEEDED_ERR` constructor of the `:domException` type.
+public fun quota_EXCEEDED_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/QUOTA_EXCEEDED_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `TIMEOUT_ERR` constructor of the `:domException` type.
+public fun timeout_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/TIMEOUT_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `INVALID_NODE_TYPE_ERR` constructor of the `:domException` type.
+public fun invalid_NODE_TYPE_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/INVALID_NODE_TYPE_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DATA_CLONE_ERR` constructor of the `:domException` type.
+public fun data_CLONE_ERR? : (domException : domException) -> bool
+  = fun(domException:domException){
+    match (domException) {
+      sys/dom/types/DATA_CLONE_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `UNSPECIFIED_EVENT_TYPE_ERR` constructor of the `:eventExceptionCode` type.
+public fun unspecified_EVENT_TYPE_ERR? : (eventExceptionCode : eventExceptionCode) -> bool
+  = fun(eventExceptionCode:eventExceptionCode){
+    match (eventExceptionCode) {
+      sys/dom/types/UNSPECIFIED_EVENT_TYPE_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DISPATCH_REQUEST_ERR` constructor of the `:eventExceptionCode` type.
+public fun dispatch_REQUEST_ERR? : (eventExceptionCode : eventExceptionCode) -> bool
+  = fun(eventExceptionCode:eventExceptionCode){
+    match (eventExceptionCode) {
+      sys/dom/types/DISPATCH_REQUEST_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CAPTURING_PHASE` constructor of the `:eventPhase` type.
+public fun capturing_PHASE? : (eventPhase : eventPhase) -> bool
+  = fun(eventPhase:eventPhase){
+    match (eventPhase) {
+      sys/dom/types/CAPTURING_PHASE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `AT_TARGET` constructor of the `:eventPhase` type.
+public fun at_TARGET? : (eventPhase : eventPhase) -> bool
+  = fun(eventPhase:eventPhase){
+    match (eventPhase) {
+      sys/dom/types/AT_TARGET() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `BUBBLING_PHASE` constructor of the `:eventPhase` type.
+public fun bubbling_PHASE? : (eventPhase : eventPhase) -> bool
+  = fun(eventPhase:eventPhase){
+    match (eventPhase) {
+      sys/dom/types/BUBBLING_PHASE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CONNECTING` constructor of the `:eventSourceReadyState` type.
+public fun connecting? : (eventSourceReadyState : eventSourceReadyState) -> bool
+  = fun(eventSourceReadyState:eventSourceReadyState){
+    match (eventSourceReadyState) {
+      sys/dom/types/CONNECTING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `OPEN` constructor of the `:eventSourceReadyState` type.
+public fun open? : (eventSourceReadyState : eventSourceReadyState) -> bool
+  = fun(eventSourceReadyState:eventSourceReadyState){
+    match (eventSourceReadyState) {
+      sys/dom/types/OPEN() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CLOSED` constructor of the `:eventSourceReadyState` type.
+public fun closed? : (eventSourceReadyState : eventSourceReadyState) -> bool
+  = fun(eventSourceReadyState:eventSourceReadyState){
+    match (eventSourceReadyState) {
+      sys/dom/types/CLOSED() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE__NOT_FOUND_ERR` constructor of the `:fileErrorCode` type.
+public fun file__NOT_FOUND_ERR? : (fileErrorCode : fileErrorCode) -> bool
+  = fun(fileErrorCode:fileErrorCode){
+    match (fileErrorCode) {
+      sys/dom/types/FILE__NOT_FOUND_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE__SECURITY_ERR` constructor of the `:fileErrorCode` type.
+public fun file__SECURITY_ERR? : (fileErrorCode : fileErrorCode) -> bool
+  = fun(fileErrorCode:fileErrorCode){
+    match (fileErrorCode) {
+      sys/dom/types/FILE__SECURITY_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE__ABORT_ERR` constructor of the `:fileErrorCode` type.
+public fun file__ABORT_ERR? : (fileErrorCode : fileErrorCode) -> bool
+  = fun(fileErrorCode:fileErrorCode){
+    match (fileErrorCode) {
+      sys/dom/types/FILE__ABORT_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE__NOT_READABLE_ERR` constructor of the `:fileErrorCode` type.
+public fun file__NOT_READABLE_ERR? : (fileErrorCode : fileErrorCode) -> bool
+  = fun(fileErrorCode:fileErrorCode){
+    match (fileErrorCode) {
+      sys/dom/types/FILE__NOT_READABLE_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE__ENCODING_ERR` constructor of the `:fileErrorCode` type.
+public fun file__ENCODING_ERR? : (fileErrorCode : fileErrorCode) -> bool
+  = fun(fileErrorCode:fileErrorCode){
+    match (fileErrorCode) {
+      sys/dom/types/FILE__ENCODING_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE_NOT_FOUND_ERR` constructor of the `:fileExceptionCode` type.
+public fun file_NOT_FOUND_ERR? : (fileExceptionCode : fileExceptionCode) -> bool
+  = fun(fileExceptionCode:fileExceptionCode){
+    match (fileExceptionCode) {
+      sys/dom/types/FILE_NOT_FOUND_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE_SECURITY_ERR` constructor of the `:fileExceptionCode` type.
+public fun file_SECURITY_ERR? : (fileExceptionCode : fileExceptionCode) -> bool
+  = fun(fileExceptionCode:fileExceptionCode){
+    match (fileExceptionCode) {
+      sys/dom/types/FILE_SECURITY_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE_ABORT_ERR` constructor of the `:fileExceptionCode` type.
+public fun file_ABORT_ERR? : (fileExceptionCode : fileExceptionCode) -> bool
+  = fun(fileExceptionCode:fileExceptionCode){
+    match (fileExceptionCode) {
+      sys/dom/types/FILE_ABORT_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE_NOT_READABLE_ERR` constructor of the `:fileExceptionCode` type.
+public fun file_NOT_READABLE_ERR? : (fileExceptionCode : fileExceptionCode) -> bool
+  = fun(fileExceptionCode:fileExceptionCode){
+    match (fileExceptionCode) {
+      sys/dom/types/FILE_NOT_READABLE_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE_ENCODING_ERR` constructor of the `:fileExceptionCode` type.
+public fun file_ENCODING_ERR? : (fileExceptionCode : fileExceptionCode) -> bool
+  = fun(fileExceptionCode:fileExceptionCode){
+    match (fileExceptionCode) {
+      sys/dom/types/FILE_ENCODING_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `BYTES_PER_ELEMENT` constructor of the `:fileExceptionCode` type.
+public fun bytes_PER_ELEMENT? : (fileExceptionCode : fileExceptionCode) -> bool
+  = fun(fileExceptionCode:fileExceptionCode){
+    match (fileExceptionCode) {
+      sys/dom/types/BYTES_PER_ELEMENT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE_READER_EMPTY` constructor of the `:fileReaderReadyState` type.
+public fun file_READER_EMPTY? : (fileReaderReadyState : fileReaderReadyState) -> bool
+  = fun(fileReaderReadyState:fileReaderReadyState){
+    match (fileReaderReadyState) {
+      sys/dom/types/FILE_READER_EMPTY() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE_READER_LOADING` constructor of the `:fileReaderReadyState` type.
+public fun file_READER_LOADING? : (fileReaderReadyState : fileReaderReadyState) -> bool
+  = fun(fileReaderReadyState:fileReaderReadyState){
+    match (fileReaderReadyState) {
+      sys/dom/types/FILE_READER_LOADING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILE_READER_DONE` constructor of the `:fileReaderReadyState` type.
+public fun file_READER_DONE? : (fileReaderReadyState : fileReaderReadyState) -> bool
+  = fun(fileReaderReadyState:fileReaderReadyState){
+    match (fileReaderReadyState) {
+      sys/dom/types/FILE_READER_DONE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_KEY_LOCATION_STANDARD` constructor of the `:keyboardEventLocation` type.
+public fun dom_KEY_LOCATION_STANDARD? : (keyboardEventLocation : keyboardEventLocation) -> bool
+  = fun(keyboardEventLocation:keyboardEventLocation){
+    match (keyboardEventLocation) {
+      sys/dom/types/DOM_KEY_LOCATION_STANDARD() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_KEY_LOCATION_LEFT` constructor of the `:keyboardEventLocation` type.
+public fun dom_KEY_LOCATION_LEFT? : (keyboardEventLocation : keyboardEventLocation) -> bool
+  = fun(keyboardEventLocation:keyboardEventLocation){
+    match (keyboardEventLocation) {
+      sys/dom/types/DOM_KEY_LOCATION_LEFT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_KEY_LOCATION_RIGHT` constructor of the `:keyboardEventLocation` type.
+public fun dom_KEY_LOCATION_RIGHT? : (keyboardEventLocation : keyboardEventLocation) -> bool
+  = fun(keyboardEventLocation:keyboardEventLocation){
+    match (keyboardEventLocation) {
+      sys/dom/types/DOM_KEY_LOCATION_RIGHT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_KEY_LOCATION_NUMPAD` constructor of the `:keyboardEventLocation` type.
+public fun dom_KEY_LOCATION_NUMPAD? : (keyboardEventLocation : keyboardEventLocation) -> bool
+  = fun(keyboardEventLocation:keyboardEventLocation){
+    match (keyboardEventLocation) {
+      sys/dom/types/DOM_KEY_LOCATION_NUMPAD() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_KEY_LOCATION_MOBILE` constructor of the `:keyboardEventLocation` type.
+public fun dom_KEY_LOCATION_MOBILE? : (keyboardEventLocation : keyboardEventLocation) -> bool
+  = fun(keyboardEventLocation:keyboardEventLocation){
+    match (keyboardEventLocation) {
+      sys/dom/types/DOM_KEY_LOCATION_MOBILE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_KEY_LOCATION_JOYSTICK` constructor of the `:keyboardEventLocation` type.
+public fun dom_KEY_LOCATION_JOYSTICK? : (keyboardEventLocation : keyboardEventLocation) -> bool
+  = fun(keyboardEventLocation:keyboardEventLocation){
+    match (keyboardEventLocation) {
+      sys/dom/types/DOM_KEY_LOCATION_JOYSTICK() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `MEDIA_ERR_ABORTED` constructor of the `:mediaErrorCode` type.
+public fun media_ERR_ABORTED? : (mediaErrorCode : mediaErrorCode) -> bool
+  = fun(mediaErrorCode:mediaErrorCode){
+    match (mediaErrorCode) {
+      sys/dom/types/MEDIA_ERR_ABORTED() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `MEDIA_ERR_NETWORK` constructor of the `:mediaErrorCode` type.
+public fun media_ERR_NETWORK? : (mediaErrorCode : mediaErrorCode) -> bool
+  = fun(mediaErrorCode:mediaErrorCode){
+    match (mediaErrorCode) {
+      sys/dom/types/MEDIA_ERR_NETWORK() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `MEDIA_ERR_DECODE` constructor of the `:mediaErrorCode` type.
+public fun media_ERR_DECODE? : (mediaErrorCode : mediaErrorCode) -> bool
+  = fun(mediaErrorCode:mediaErrorCode){
+    match (mediaErrorCode) {
+      sys/dom/types/MEDIA_ERR_DECODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `MEDIA_ERR_SRC_NOT_SUPPORTED` constructor of the `:mediaErrorCode` type.
+public fun media_ERR_SRC_NOT_SUPPORTED? : (mediaErrorCode : mediaErrorCode) -> bool
+  = fun(mediaErrorCode:mediaErrorCode){
+    match (mediaErrorCode) {
+      sys/dom/types/MEDIA_ERR_SRC_NOT_SUPPORTED() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `HAVE_NOTHING` constructor of the `:mediaReadyState` type.
+public fun have_NOTHING? : (mediaReadyState : mediaReadyState) -> bool
+  = fun(mediaReadyState:mediaReadyState){
+    match (mediaReadyState) {
+      sys/dom/types/HAVE_NOTHING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `HAVE_METADATA` constructor of the `:mediaReadyState` type.
+public fun have_METADATA? : (mediaReadyState : mediaReadyState) -> bool
+  = fun(mediaReadyState:mediaReadyState){
+    match (mediaReadyState) {
+      sys/dom/types/HAVE_METADATA() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `HAVE_CURRENT_DATA` constructor of the `:mediaReadyState` type.
+public fun have_CURRENT_DATA? : (mediaReadyState : mediaReadyState) -> bool
+  = fun(mediaReadyState:mediaReadyState){
+    match (mediaReadyState) {
+      sys/dom/types/HAVE_CURRENT_DATA() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `HAVE_FUTURE_DATA` constructor of the `:mediaReadyState` type.
+public fun have_FUTURE_DATA? : (mediaReadyState : mediaReadyState) -> bool
+  = fun(mediaReadyState:mediaReadyState){
+    match (mediaReadyState) {
+      sys/dom/types/HAVE_FUTURE_DATA() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `HAVE_ENOUGH_DATA` constructor of the `:mediaReadyState` type.
+public fun have_ENOUGH_DATA? : (mediaReadyState : mediaReadyState) -> bool
+  = fun(mediaReadyState:mediaReadyState){
+    match (mediaReadyState) {
+      sys/dom/types/HAVE_ENOUGH_DATA() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `LIVE` constructor of the `:mediaStreamReadyState` type.
+public fun live? : (mediaStreamReadyState : mediaStreamReadyState) -> bool
+  = fun(mediaStreamReadyState:mediaStreamReadyState){
+    match (mediaStreamReadyState) {
+      sys/dom/types/LIVE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `ENDED` constructor of the `:mediaStreamReadyState` type.
+public fun ended? : (mediaStreamReadyState : mediaStreamReadyState) -> bool
+  = fun(mediaStreamReadyState:mediaStreamReadyState){
+    match (mediaStreamReadyState) {
+      sys/dom/types/ENDED() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `MODIFICATION` constructor of the `:mutationEventAttrChange` type.
+public fun modification? : (mutationEventAttrChange : mutationEventAttrChange) -> bool
+  = fun(mutationEventAttrChange:mutationEventAttrChange){
+    match (mutationEventAttrChange) {
+      sys/dom/types/MODIFICATION() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `ADDITION` constructor of the `:mutationEventAttrChange` type.
+public fun addition? : (mutationEventAttrChange : mutationEventAttrChange) -> bool
+  = fun(mutationEventAttrChange:mutationEventAttrChange){
+    match (mutationEventAttrChange) {
+      sys/dom/types/ADDITION() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `REMOVAL` constructor of the `:mutationEventAttrChange` type.
+public fun removal? : (mutationEventAttrChange : mutationEventAttrChange) -> bool
+  = fun(mutationEventAttrChange:mutationEventAttrChange){
+    match (mutationEventAttrChange) {
+      sys/dom/types/REMOVAL() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+public fun (.copy) : (navigatorUserMediaErrorCode) -> navigatorUserMediaErrorCode
+  = fun(.this:navigatorUserMediaErrorCode){
+    sys/dom/types/PERMISSION_DENIED
+  };
+// Automatically generated. Tests for the `NETWORK_EMPTY` constructor of the `:networkState` type.
+public fun network_EMPTY? : (networkState : networkState) -> bool
+  = fun(networkState:networkState){
+    match (networkState) {
+      sys/dom/types/NETWORK_EMPTY() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `NETWORK_IDLE` constructor of the `:networkState` type.
+public fun network_IDLE? : (networkState : networkState) -> bool
+  = fun(networkState:networkState){
+    match (networkState) {
+      sys/dom/types/NETWORK_IDLE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `NETWORK_LOADING` constructor of the `:networkState` type.
+public fun network_LOADING? : (networkState : networkState) -> bool
+  = fun(networkState:networkState){
+    match (networkState) {
+      sys/dom/types/NETWORK_LOADING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `NETWORK_NO_SOURCE` constructor of the `:networkState` type.
+public fun network_NO_SOURCE? : (networkState : networkState) -> bool
+  = fun(networkState:networkState){
+    match (networkState) {
+      sys/dom/types/NETWORK_NO_SOURCE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILTER_ACCEPT` constructor of the `:nodeFilterAcceptCode` type.
+public fun filter_ACCEPT? : (nodeFilterAcceptCode : nodeFilterAcceptCode) -> bool
+  = fun(nodeFilterAcceptCode:nodeFilterAcceptCode){
+    match (nodeFilterAcceptCode) {
+      sys/dom/types/FILTER_ACCEPT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILTER_REJECT` constructor of the `:nodeFilterAcceptCode` type.
+public fun filter_REJECT? : (nodeFilterAcceptCode : nodeFilterAcceptCode) -> bool
+  = fun(nodeFilterAcceptCode:nodeFilterAcceptCode){
+    match (nodeFilterAcceptCode) {
+      sys/dom/types/FILTER_REJECT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `FILTER_SKIP` constructor of the `:nodeFilterAcceptCode` type.
+public fun filter_SKIP? : (nodeFilterAcceptCode : nodeFilterAcceptCode) -> bool
+  = fun(nodeFilterAcceptCode:nodeFilterAcceptCode){
+    match (nodeFilterAcceptCode) {
+      sys/dom/types/FILTER_SKIP() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_ALL` constructor of the `:nodeFilterSelectCode` type.
+public fun show_ALL? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_ALL() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_ELEMENT` constructor of the `:nodeFilterSelectCode` type.
+public fun show_ELEMENT? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_ELEMENT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_ATTRIBUTE` constructor of the `:nodeFilterSelectCode` type.
+public fun show_ATTRIBUTE? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_ATTRIBUTE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_TEXT` constructor of the `:nodeFilterSelectCode` type.
+public fun show_TEXT? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_TEXT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_CDATA_SECTION` constructor of the `:nodeFilterSelectCode` type.
+public fun show_CDATA_SECTION? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_CDATA_SECTION() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_ENTITY_REFERENCE` constructor of the `:nodeFilterSelectCode` type.
+public fun show_ENTITY_REFERENCE? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_ENTITY_REFERENCE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_ENTITY` constructor of the `:nodeFilterSelectCode` type.
+public fun show_ENTITY? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_ENTITY() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_PROCESSING_INSTRUCTION` constructor of the `:nodeFilterSelectCode` type.
+public fun show_PROCESSING_INSTRUCTION? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_PROCESSING_INSTRUCTION() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_COMMENT` constructor of the `:nodeFilterSelectCode` type.
+public fun show_COMMENT? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_COMMENT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_DOCUMENT` constructor of the `:nodeFilterSelectCode` type.
+public fun show_DOCUMENT? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_DOCUMENT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_DOCUMENT_TYPE` constructor of the `:nodeFilterSelectCode` type.
+public fun show_DOCUMENT_TYPE? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_DOCUMENT_TYPE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_DOCUMENT_FRAGMENT` constructor of the `:nodeFilterSelectCode` type.
+public fun show_DOCUMENT_FRAGMENT? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_DOCUMENT_FRAGMENT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `SHOW_NOTATION` constructor of the `:nodeFilterSelectCode` type.
+public fun show_NOTATION? : (nodeFilterSelectCode : nodeFilterSelectCode) -> bool
+  = fun(nodeFilterSelectCode:nodeFilterSelectCode){
+    match (nodeFilterSelectCode) {
+      sys/dom/types/SHOW_NOTATION() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `ELEMENT_NODE` constructor of the `:nodeType` type.
+public fun element_NODE? : (nodeType : nodeType) -> bool
+  = fun(nodeType:nodeType){
+    match (nodeType) {
+      sys/dom/types/ELEMENT_NODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `ATTRIBUTE_NODE` constructor of the `:nodeType` type.
+public fun attribute_NODE? : (nodeType : nodeType) -> bool
+  = fun(nodeType:nodeType){
+    match (nodeType) {
+      sys/dom/types/ATTRIBUTE_NODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `TEXT_NODE` constructor of the `:nodeType` type.
+public fun text_NODE? : (nodeType : nodeType) -> bool
+  = fun(nodeType:nodeType){
+    match (nodeType) {
+      sys/dom/types/TEXT_NODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `CDATA_SECTION_NODE` constructor of the `:nodeType` type.
+public fun cdata_SECTION_NODE? : (nodeType : nodeType) -> bool
+  = fun(nodeType:nodeType){
+    match (nodeType) {
+      sys/dom/types/CDATA_SECTION_NODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `ENTITY_REFERENCE_NODE` constructor of the `:nodeType` type.
+public fun entity_REFERENCE_NODE? : (nodeType : nodeType) -> bool
+  = fun(nodeType:nodeType){
+    match (nodeType) {
+      sys/dom/types/ENTITY_REFERENCE_NODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `ENTITY_NODE` constructor of the `:nodeType` type.
+public fun entity_NODE? : (nodeType : nodeType) -> bool
+  = fun(nodeType:nodeType){
+    match (nodeType) {
+      sys/dom/types/ENTITY_NODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `PROCESSING_INSTRUCTION_NODE` constructor of the `:nodeType` type.
+public fun processing_INSTRUCTION_NODE? : (nodeType : nodeType) -> bool
+  = fun(nodeType:nodeType){
+    match (nodeType) {
+      sys/dom/types/PROCESSING_INSTRUCTION_NODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `COMMENT_NODE` constructor of the `:nodeType` type.
+public fun comment_NODE? : (nodeType : nodeType) -> bool
+  = fun(nodeType:nodeType){
+    match (nodeType) {
+      sys/dom/types/COMMENT_NODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOCUMENT_NODE` constructor of the `:nodeType` type.
+public fun document_NODE? : (nodeType : nodeType) -> bool
+  = fun(nodeType:nodeType){
+    match (nodeType) {
+      sys/dom/types/DOCUMENT_NODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOCUMENT_TYPE_NODE` constructor of the `:nodeType` type.
+public fun document_TYPE_NODE? : (nodeType : nodeType) -> bool
+  = fun(nodeType:nodeType){
+    match (nodeType) {
+      sys/dom/types/DOCUMENT_TYPE_NODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOCUMENT_FRAGMENT_NODE` constructor of the `:nodeType` type.
+public fun document_FRAGMENT_NODE? : (nodeType : nodeType) -> bool
+  = fun(nodeType:nodeType){
+    match (nodeType) {
+      sys/dom/types/DOCUMENT_FRAGMENT_NODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `NOTATION_NODE` constructor of the `:nodeType` type.
+public fun notation_NODE? : (nodeType : nodeType) -> bool
+  = fun(nodeType:nodeType){
+    match (nodeType) {
+      sys/dom/types/NOTATION_NODE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `PEER_CONNECTION_NEW` constructor of the `:peerConnectionReadyState` type.
+public fun peer_CONNECTION_NEW? : (peerConnectionReadyState : peerConnectionReadyState) -> bool
+  = fun(peerConnectionReadyState:peerConnectionReadyState){
+    match (peerConnectionReadyState) {
+      sys/dom/types/PEER_CONNECTION_NEW() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `PEER_CONNECTION_NEGOTIATING` constructor of the `:peerConnectionReadyState` type.
+public fun peer_CONNECTION_NEGOTIATING? : (peerConnectionReadyState : peerConnectionReadyState) -> bool
+  = fun(peerConnectionReadyState:peerConnectionReadyState){
+    match (peerConnectionReadyState) {
+      sys/dom/types/PEER_CONNECTION_NEGOTIATING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `PEER_CONNECTION_ACTIVE` constructor of the `:peerConnectionReadyState` type.
+public fun peer_CONNECTION_ACTIVE? : (peerConnectionReadyState : peerConnectionReadyState) -> bool
+  = fun(peerConnectionReadyState:peerConnectionReadyState){
+    match (peerConnectionReadyState) {
+      sys/dom/types/PEER_CONNECTION_ACTIVE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `PEER_CONNECTION_CLOSED` constructor of the `:peerConnectionReadyState` type.
+public fun peer_CONNECTION_CLOSED? : (peerConnectionReadyState : peerConnectionReadyState) -> bool
+  = fun(peerConnectionReadyState:peerConnectionReadyState){
+    match (peerConnectionReadyState) {
+      sys/dom/types/PEER_CONNECTION_CLOSED() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `RANGE_BAD_BOUNDARYPOINTS_ERR` constructor of the `:rangeExceptionCode` type.
+public fun range_BAD_BOUNDARYPOINTS_ERR? : (rangeExceptionCode : rangeExceptionCode) -> bool
+  = fun(rangeExceptionCode:rangeExceptionCode){
+    match (rangeExceptionCode) {
+      sys/dom/types/RANGE_BAD_BOUNDARYPOINTS_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `RANGE_INVALID_NODE_TYPE_ERR` constructor of the `:rangeExceptionCode` type.
+public fun range_INVALID_NODE_TYPE_ERR? : (rangeExceptionCode : rangeExceptionCode) -> bool
+  = fun(rangeExceptionCode:rangeExceptionCode){
+    match (rangeExceptionCode) {
+      sys/dom/types/RANGE_INVALID_NODE_TYPE_ERR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `START_TO_START` constructor of the `:rangeExceptionCompareHow` type.
+public fun start_TO_START? : (rangeExceptionCompareHow : rangeExceptionCompareHow) -> bool
+  = fun(rangeExceptionCompareHow:rangeExceptionCompareHow){
+    match (rangeExceptionCompareHow) {
+      sys/dom/types/START_TO_START() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `START_TO_END` constructor of the `:rangeExceptionCompareHow` type.
+public fun start_TO_END? : (rangeExceptionCompareHow : rangeExceptionCompareHow) -> bool
+  = fun(rangeExceptionCompareHow:rangeExceptionCompareHow){
+    match (rangeExceptionCompareHow) {
+      sys/dom/types/START_TO_END() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `END_TO_END` constructor of the `:rangeExceptionCompareHow` type.
+public fun end_TO_END? : (rangeExceptionCompareHow : rangeExceptionCompareHow) -> bool
+  = fun(rangeExceptionCompareHow:rangeExceptionCompareHow){
+    match (rangeExceptionCompareHow) {
+      sys/dom/types/END_TO_END() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `END_TO_START` constructor of the `:rangeExceptionCompareHow` type.
+public fun end_TO_START? : (rangeExceptionCompareHow : rangeExceptionCompareHow) -> bool
+  = fun(rangeExceptionCompareHow:rangeExceptionCompareHow){
+    match (rangeExceptionCompareHow) {
+      sys/dom/types/END_TO_START() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_INPUT_METHOD_UNKNOWN` constructor of the `:textEventInputMethod` type.
+public fun dom_INPUT_METHOD_UNKNOWN? : (textEventInputMethod : textEventInputMethod) -> bool
+  = fun(textEventInputMethod:textEventInputMethod){
+    match (textEventInputMethod) {
+      sys/dom/types/DOM_INPUT_METHOD_UNKNOWN() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_INPUT_METHOD_KEYBOARD` constructor of the `:textEventInputMethod` type.
+public fun dom_INPUT_METHOD_KEYBOARD? : (textEventInputMethod : textEventInputMethod) -> bool
+  = fun(textEventInputMethod:textEventInputMethod){
+    match (textEventInputMethod) {
+      sys/dom/types/DOM_INPUT_METHOD_KEYBOARD() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_INPUT_METHOD_PASTE` constructor of the `:textEventInputMethod` type.
+public fun dom_INPUT_METHOD_PASTE? : (textEventInputMethod : textEventInputMethod) -> bool
+  = fun(textEventInputMethod:textEventInputMethod){
+    match (textEventInputMethod) {
+      sys/dom/types/DOM_INPUT_METHOD_PASTE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_INPUT_METHOD_DROP` constructor of the `:textEventInputMethod` type.
+public fun dom_INPUT_METHOD_DROP? : (textEventInputMethod : textEventInputMethod) -> bool
+  = fun(textEventInputMethod:textEventInputMethod){
+    match (textEventInputMethod) {
+      sys/dom/types/DOM_INPUT_METHOD_DROP() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_INPUT_METHOD_IME` constructor of the `:textEventInputMethod` type.
+public fun dom_INPUT_METHOD_IME? : (textEventInputMethod : textEventInputMethod) -> bool
+  = fun(textEventInputMethod:textEventInputMethod){
+    match (textEventInputMethod) {
+      sys/dom/types/DOM_INPUT_METHOD_IME() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_INPUT_METHOD_OPTION` constructor of the `:textEventInputMethod` type.
+public fun dom_INPUT_METHOD_OPTION? : (textEventInputMethod : textEventInputMethod) -> bool
+  = fun(textEventInputMethod:textEventInputMethod){
+    match (textEventInputMethod) {
+      sys/dom/types/DOM_INPUT_METHOD_OPTION() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_INPUT_METHOD_HANDWRITING` constructor of the `:textEventInputMethod` type.
+public fun dom_INPUT_METHOD_HANDWRITING? : (textEventInputMethod : textEventInputMethod) -> bool
+  = fun(textEventInputMethod:textEventInputMethod){
+    match (textEventInputMethod) {
+      sys/dom/types/DOM_INPUT_METHOD_HANDWRITING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_INPUT_METHOD_VOICE` constructor of the `:textEventInputMethod` type.
+public fun dom_INPUT_METHOD_VOICE? : (textEventInputMethod : textEventInputMethod) -> bool
+  = fun(textEventInputMethod:textEventInputMethod){
+    match (textEventInputMethod) {
+      sys/dom/types/DOM_INPUT_METHOD_VOICE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_INPUT_METHOD_MULTIMODAL` constructor of the `:textEventInputMethod` type.
+public fun dom_INPUT_METHOD_MULTIMODAL? : (textEventInputMethod : textEventInputMethod) -> bool
+  = fun(textEventInputMethod:textEventInputMethod){
+    match (textEventInputMethod) {
+      sys/dom/types/DOM_INPUT_METHOD_MULTIMODAL() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_INPUT_METHOD_SCRIPT` constructor of the `:textEventInputMethod` type.
+public fun dom_INPUT_METHOD_SCRIPT? : (textEventInputMethod : textEventInputMethod) -> bool
+  = fun(textEventInputMethod:textEventInputMethod){
+    match (textEventInputMethod) {
+      sys/dom/types/DOM_INPUT_METHOD_SCRIPT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `TEXT_TRACK_OFF` constructor of the `:textTrackMode` type.
+public fun text_TRACK_OFF? : (textTrackMode : textTrackMode) -> bool
+  = fun(textTrackMode:textTrackMode){
+    match (textTrackMode) {
+      sys/dom/types/TEXT_TRACK_OFF() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `TEXT_TRACK_HIDDEN` constructor of the `:textTrackMode` type.
+public fun text_TRACK_HIDDEN? : (textTrackMode : textTrackMode) -> bool
+  = fun(textTrackMode:textTrackMode){
+    match (textTrackMode) {
+      sys/dom/types/TEXT_TRACK_HIDDEN() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `TEXT_TRACK_SHOWING` constructor of the `:textTrackMode` type.
+public fun text_TRACK_SHOWING? : (textTrackMode : textTrackMode) -> bool
+  = fun(textTrackMode:textTrackMode){
+    match (textTrackMode) {
+      sys/dom/types/TEXT_TRACK_SHOWING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `TEXT_TRACK_NONE` constructor of the `:textTrackReadyState` type.
+public fun text_TRACK_NONE? : (textTrackReadyState : textTrackReadyState) -> bool
+  = fun(textTrackReadyState:textTrackReadyState){
+    match (textTrackReadyState) {
+      sys/dom/types/TEXT_TRACK_NONE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `TEXT_TRACK_LOADING` constructor of the `:textTrackReadyState` type.
+public fun text_TRACK_LOADING? : (textTrackReadyState : textTrackReadyState) -> bool
+  = fun(textTrackReadyState:textTrackReadyState){
+    match (textTrackReadyState) {
+      sys/dom/types/TEXT_TRACK_LOADING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `TEXT_TRACK_LOADED` constructor of the `:textTrackReadyState` type.
+public fun text_TRACK_LOADED? : (textTrackReadyState : textTrackReadyState) -> bool
+  = fun(textTrackReadyState:textTrackReadyState){
+    match (textTrackReadyState) {
+      sys/dom/types/TEXT_TRACK_LOADED() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `TEXT_TRACK_ERROR` constructor of the `:textTrackReadyState` type.
+public fun text_TRACK_ERROR? : (textTrackReadyState : textTrackReadyState) -> bool
+  = fun(textTrackReadyState:textTrackReadyState){
+    match (textTrackReadyState) {
+      sys/dom/types/TEXT_TRACK_ERROR() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_DELTA_PIXEL` constructor of the `:wheelEventDeltaMode` type.
+public fun dom_DELTA_PIXEL? : (wheelEventDeltaMode : wheelEventDeltaMode) -> bool
+  = fun(wheelEventDeltaMode:wheelEventDeltaMode){
+    match (wheelEventDeltaMode) {
+      sys/dom/types/DOM_DELTA_PIXEL() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_DELTA_LINE` constructor of the `:wheelEventDeltaMode` type.
+public fun dom_DELTA_LINE? : (wheelEventDeltaMode : wheelEventDeltaMode) -> bool
+  = fun(wheelEventDeltaMode:wheelEventDeltaMode){
+    match (wheelEventDeltaMode) {
+      sys/dom/types/DOM_DELTA_LINE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DOM_DELTA_PAGE` constructor of the `:wheelEventDeltaMode` type.
+public fun dom_DELTA_PAGE? : (wheelEventDeltaMode : wheelEventDeltaMode) -> bool
+  = fun(wheelEventDeltaMode:wheelEventDeltaMode){
+    match (wheelEventDeltaMode) {
+      sys/dom/types/DOM_DELTA_PAGE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `UNSENT` constructor of the `:xmlHttpRequestReadyState` type.
+public fun unsent? : (xmlHttpRequestReadyState : xmlHttpRequestReadyState) -> bool
+  = fun(xmlHttpRequestReadyState:xmlHttpRequestReadyState){
+    match (xmlHttpRequestReadyState) {
+      sys/dom/types/UNSENT() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `OPENED` constructor of the `:xmlHttpRequestReadyState` type.
+public fun opened? : (xmlHttpRequestReadyState : xmlHttpRequestReadyState) -> bool
+  = fun(xmlHttpRequestReadyState:xmlHttpRequestReadyState){
+    match (xmlHttpRequestReadyState) {
+      sys/dom/types/OPENED() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `HEADERS_RECEIVED` constructor of the `:xmlHttpRequestReadyState` type.
+public fun headers_RECEIVED? : (xmlHttpRequestReadyState : xmlHttpRequestReadyState) -> bool
+  = fun(xmlHttpRequestReadyState:xmlHttpRequestReadyState){
+    match (xmlHttpRequestReadyState) {
+      sys/dom/types/HEADERS_RECEIVED() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `LOADING` constructor of the `:xmlHttpRequestReadyState` type.
+public fun loading? : (xmlHttpRequestReadyState : xmlHttpRequestReadyState) -> bool
+  = fun(xmlHttpRequestReadyState:xmlHttpRequestReadyState){
+    match (xmlHttpRequestReadyState) {
+      sys/dom/types/LOADING() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+// Automatically generated. Tests for the `DONE` constructor of the `:xmlHttpRequestReadyState` type.
+public fun done? : (xmlHttpRequestReadyState : xmlHttpRequestReadyState) -> bool
+  = fun(xmlHttpRequestReadyState:xmlHttpRequestReadyState){
+    match (xmlHttpRequestReadyState) {
+      sys/dom/types/DONE() -> std/core/True
+      _ -> std/core/False
+    }
+  };
+public external get : (this : styleSheetList, index : int) -> dom cssStyleSheet = inline "(#1)[#2]";
+public external set : (this : styleSheetList, index : int, assigned : cssStyleSheet) -> dom () = inline "((#1)[#2] = #3)";
+public external length : (this : styleSheetList) -> dom int = inline "(#1).length";

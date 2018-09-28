@@ -1,0 +1,58 @@
+/* Props
+*/
+module concur/props
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+import std/core = std/core = "";
+type prop ;
+// immutable props
+type props <a> :: V -> V ;
+// Index into props
+public fun [] : forall<a> (p : props<a>, s : string) -> maybe<a>
+  = forall<a> fun(p:props<a>, s:string){
+    match ((concur/props/contains-key{@}(p, s))) {
+      std/core/True() -> std/core/Just((concur/props/unsafe-index{@}(p, s)))
+      std/core/False() -> std/core/Nothing
+    }
+  };
+/* Handler with no args */
+public fun mkHandler0 : forall<e> (() -> e ()) -> prop
+  = forall<e> fun(.arg1:() -> e ()){
+    concur/props/(.extern-mkHandler0){@}(.arg1)
+  };
+// Create a prop
+public fun props : forall<a> () -> props<a>
+  = forall<a> fun(){
+    concur/props/(.extern-props){@}()
+  };
+// Create new props from a `:list` of key value pairs.
+public fun props .1 : forall<a> (elems : list<(string, a)>) -> props<a>
+  = forall<a> fun(elems:list<(string, a)>){
+    concur/props/(.extern-props.1){@}(elems)
+  };
+fun unsafe-props-add : forall<a> (d : props<a>, k : string, v : a) -> props<a>
+  = forall<a> fun(d:props<a>, k:string, v:a){
+    concur/props/(.extern-unsafe-props-add){@}(d, k, v)
+  };
+// Create a prop
+external (.extern-props) : forall<a> () -> props<a> {
+  js inline "{}";
+}
+external unsafe-index : forall<a> (p : props<a>, s : string) -> a {
+  js inline "((#1)[#2])";
+}
+public external contains-key : forall<a> (p : props<a>, s : string) -> bool {
+  js inline "((#1)[#2]!==undefined)";
+}
+external (.extern-unsafe-props-add) : forall<a> (d : props<a>, k : string, v : a) -> props<a> {
+  js inline "((#1)[#2]=(#3))";
+}
+// Create new props from a `:list` of key value pairs.
+external (.extern-props) .1 : forall<a> (elems : list<(string, a)>) -> props<a> {
+  js inline "_props_list(#1)";
+}
+/* Handler with no args */
+external (.extern-mkHandler0) : forall<e> (() -> e ()) -> prop = inline "#1";

@@ -1,0 +1,33 @@
+// Utility function to access the DOM inside a browser.
+module interface sys/dom
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+import std/core = std/core = "";
+// Basic types of the HTML5 DOM model
+import sys/dom/types = sys/dom/types = "";
+// Stateful funs can manipulate heap `:h` using allocations, reads and writes.
+private alias std/core/st<(h :: H)> :: H -> E = <(std/core/read :: H -> X)<(h :: H)>,(std/core/write :: H -> X)<(h :: H)>,(std/core/alloc :: H -> X)<(h :: H)>> = 1;
+private alias sys/dom/types/dom :: E = <(std/core/exn :: X),(std/core/ndet :: X),(std/core/console :: X),(std/core/net :: X),(std/core/ui :: X),((std/core/st :: H -> E)<(sys/dom/types/hdom :: H)> == 1 <(std/core/read :: H -> X)<(sys/dom/types/hdom :: H)>,(std/core/write :: H -> X)<(sys/dom/types/hdom :: H)>,(std/core/alloc :: H -> X)<(sys/dom/types/hdom :: H)>>)> = 2;
+// Execute an action on a specified interval.
+fun* (.bind-interval) : forall<(e :: E)> (msecs : std/core/int, action : () -> <(sys/dom/types/dom :: E)|(e :: E)> ()) -> <(sys/dom/types/dom :: E)|(e :: E)> ();
+// Execute an action on a specified interval.
+fun (.fast-interval) : forall<(e :: E)> (msecs : std/core/int, action : () -> <(sys/dom/types/dom :: E)|(e :: E)> ()) -> <(sys/dom/types/dom :: E)|(e :: E)> ();
+// Execute an action on a specified interval.
+fun** interval : forall<(e :: E)> (msecs : std/core/int, action : () -> <(sys/dom/types/dom :: E)|(e :: E)> ()) -> <(sys/dom/types/dom :: E)|(e :: E)> ();
+// Execute an action after a specified time out.
+fun* (.bind-timeout) : forall<(e :: E)> (msecs : std/core/int, action : () -> <(sys/dom/types/dom :: E)|(e :: E)> ()) -> <(sys/dom/types/dom :: E)|(e :: E)> ();
+// Execute an action after a specified time out.
+fun (.fast-timeout) : forall<(e :: E)> (msecs : std/core/int, action : () -> <(sys/dom/types/dom :: E)|(e :: E)> ()) -> <(sys/dom/types/dom :: E)|(e :: E)> ();
+// Execute an action after a specified time out.
+fun** timeout : forall<(e :: E)> (msecs : std/core/int, action : () -> <(sys/dom/types/dom :: E)|(e :: E)> ()) -> <(sys/dom/types/dom :: E)|(e :: E)> ();
+// Execute an action that gains access to the global ":window" object. 
+fun* (.bind-withWindow) : forall<(e :: E)> (action : (sys/dom/types/window) -> <(sys/dom/types/dom :: E)|(e :: E)> ()) -> <(sys/dom/types/dom :: E)|(e :: E)> ();
+// Execute an action that gains access to the global ":window" object. 
+fun (.fast-withWindow) : forall<(e :: E)> (action : (sys/dom/types/window) -> <(sys/dom/types/dom :: E)|(e :: E)> ()) -> <(sys/dom/types/dom :: E)|(e :: E)> ();
+// Execute an action that gains access to the global ":window" object. 
+fun** withWindow : forall<(e :: E)> (action : (sys/dom/types/window) -> <(sys/dom/types/dom :: E)|(e :: E)> ()) -> <(sys/dom/types/dom :: E)|(e :: E)> ();
+// Execute an action after a specified time out.
+// Execute an action on a specified interval.

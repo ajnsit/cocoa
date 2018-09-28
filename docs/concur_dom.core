@@ -1,0 +1,40 @@
+module concur/dom
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+import std/core = std/core = "";
+// Basic types of the HTML5 DOM model
+import sys/dom/types = sys/dom/types = "";
+/* String dictionaries.
+*/
+import std/data/dict = std/data/dict = "";
+import sys/dom/html/htmlElement = sys/dom/html/htmlElement = "";
+/* Props
+*/
+import concur/props = concur/props = "";
+// Stateful funs can manipulate heap `:h` using allocations, reads and writes.
+private alias st<(h :: H)> :: H -> E = <(read :: H -> X)<(h :: H)>,(write :: H -> X)<(h :: H)>,(alloc :: H -> X)<(h :: H)>> = 1;
+type vnode ;
+/* superfine.h */
+public fun h : (name : string, props : concur/props/props<concur/props/prop>, children : vector<vnode>) -> vnode
+  = fun(name:string, props:concur/props/props<concur/props/prop>, children:vector<vnode>){
+    concur/dom/(.extern-h){@}(name, props, children)
+  };
+/* Strings can be passed as is to `h` */
+public fun t : (str : string) -> vnode
+  = fun(str:string){
+    concur/dom/(.extern-t){@}(str)
+  };
+/* superfine.patch */
+public fun patch : (lastNode : null<vnode>, nextNode : vnode, container : sys/dom/types/htmlElement) -> <st<sys/dom/types/hdom>,ui,exn,net,console,ndet> vnode
+  = fun<<ui,exn,net,alloc<sys/dom/types/hdom>,console,ndet,read<sys/dom/types/hdom>,write<sys/dom/types/hdom>>>(lastNode:null<vnode>, nextNode:vnode, container:sys/dom/types/htmlElement){
+    concur/dom/(.extern-patch){@}(lastNode, nextNode, container)
+  };
+/* superfine.h */
+external (.extern-h) : (name : string, props : concur/props/props<concur/props/prop>, children : vector<vnode>) -> vnode = inline "superfine.h(#1, #2, #3)";
+/* Strings can be passed as is to `h` */
+external (.extern-t) : (str : string) -> vnode = inline "#1";
+/* superfine.patch */
+external (.extern-patch) : (lastNode : null<vnode>, nextNode : vnode, container : sys/dom/types/htmlElement) -> sys/dom/types/dom vnode = inline "superfine.patch(#1, #2, #3)";

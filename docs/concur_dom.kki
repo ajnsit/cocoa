@@ -1,0 +1,28 @@
+module interface concur/dom
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+import std/core = std/core = "";
+// Basic types of the HTML5 DOM model
+import sys/dom/types = sys/dom/types = "";
+/* String dictionaries.
+*/
+import std/data/dict = std/data/dict = "";
+import sys/dom/html/htmlElement = sys/dom/html/htmlElement = "";
+/* Props
+*/
+import concur/props = concur/props = "";
+// Stateful funs can manipulate heap `:h` using allocations, reads and writes.
+private alias std/core/st<(h :: H)> :: H -> E = <(std/core/read :: H -> X)<(h :: H)>,(std/core/write :: H -> X)<(h :: H)>,(std/core/alloc :: H -> X)<(h :: H)>> = 1;
+type vnode ;
+/* superfine.h */
+fun h : (name : std/core/string, props : (concur/props/props :: V -> V)<concur/props/prop>, children : (std/core/vector :: V -> V)<vnode>) -> vnode;
+/* Strings can be passed as is to `h` */
+fun t : (str : std/core/string) -> vnode;
+/* superfine.patch */
+fun patch : (lastNode : (std/core/null :: V -> V)<vnode>, nextNode : vnode, container : sys/dom/types/htmlElement) -> <(std/core/st :: H -> E)<(sys/dom/types/hdom :: H)>,(std/core/ui :: X),(std/core/exn :: X),(std/core/net :: X),(std/core/console :: X),(std/core/ndet :: X)> vnode;
+/* superfine.h */
+/* Strings can be passed as is to `h` */
+/* superfine.patch */

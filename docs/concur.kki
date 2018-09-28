@@ -1,0 +1,39 @@
+module interface concur
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+import std/core = std/core = "";
+// Utility function to access the DOM inside a browser.
+import sys/dom = sys/dom = "";
+/* String dictionaries.
+*/
+import std/data/dict = std/data/dict = "";
+// Basic types of the HTML5 DOM model
+import sys/dom/types = sys/dom/types = "";
+import sys/dom/document = sys/dom/document = "";
+import sys/dom/html/window = sys/dom/html/window = "";
+import concur/dom = concur/dom = "";
+/* Props
+*/
+import concur/props = concur/props = "";
+// Stateful funs can manipulate heap `:h` using allocations, reads and writes.
+private alias std/core/st<(h :: H)> :: H -> E = <(std/core/read :: H -> X)<(h :: H)>,(std/core/write :: H -> X)<(h :: H)>,(std/core/alloc :: H -> X)<(h :: H)>> = 1;
+// An alias for pure effects: a pure function always returns the same result
+// when called with the same arguments but may not terminate or raise an exception.
+private alias std/core/pure :: E = <(std/core/exn :: X),(std/core/div :: X)> = 1;
+type st <(h :: H)> :: H -> V {
+  con St(prevNode: (std/core/ref :: (H, V) -> V)<(h :: H),(std/core/maybe :: V -> V)<concur/dom/vnode>>, container: sys/dom/types/htmlElement) : forall<(h :: H)> (prevNode : (std/core/ref :: (H, V) -> V)<(h :: H),(std/core/maybe :: V -> V)<concur/dom/vnode>>, container : sys/dom/types/htmlElement) -> (st :: H -> V)<(h :: H)>;
+};
+// Automatically generated. Retrieves the `prevNode` constructor field of the `:st` type.
+fun prevNode : forall<(h :: H)> (st : (st :: H -> V)<(h :: H)>) -> (std/core/ref :: (H, V) -> V)<(h :: H),(std/core/maybe :: V -> V)<concur/dom/vnode>>;
+// Automatically generated. Retrieves the `container` constructor field of the `:st` type.
+fun container : forall<(h :: H)> (st : (st :: H -> V)<(h :: H)>) -> sys/dom/types/htmlElement;
+fun (.copy) : forall<(h :: H)> ((st :: H -> V)<(h :: H)>, prevNode : ?(std/core/ref :: (H, V) -> V)<(h :: H),(std/core/maybe :: V -> V)<concur/dom/vnode>>, container : ?sys/dom/types/htmlElement) -> (st :: H -> V)<(h :: H)>;
+// Render function
+fun render : (state : std/core/int, st : (st :: H -> V)<(sys/dom/types/hdom :: H)>) -> <(std/core/st :: H -> E)<(sys/dom/types/hdom :: H)>,(std/core/pure :: E),(std/core/ui :: X),(std/core/net :: X),(std/core/console :: X),(std/core/ndet :: X)> ();
+// View function
+fun view : (count : std/core/int, st : (st :: H -> V)<(sys/dom/types/hdom :: H)>) -> <(std/core/st :: H -> E)<(sys/dom/types/hdom :: H)>,(std/core/pure :: E),(std/core/ui :: X),(std/core/net :: X),(std/core/console :: X),(std/core/ndet :: X)> concur/dom/vnode;
+// Main
+fun main : () -> <(std/core/st :: H -> E)<(sys/dom/types/hdom :: H)>,(std/core/pure :: E),(std/core/ui :: X),(std/core/net :: X),(std/core/console :: X),(std/core/ndet :: X)> ();

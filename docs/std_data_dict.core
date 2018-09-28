@@ -1,0 +1,283 @@
+/* String dictionaries.
+*/
+module std/data/dict
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+import std/core = std/core = "";
+// A dictionary is a map from strings to values
+type dict <a> :: V -> V ;
+// The type of mutable string dictionaries
+type mdict <(h :: H),a> :: (H, V) -> V ;
+fun dict-copy : forall<a> (d : dict<a>) -> dict<a>
+  = forall<a> fun(d:dict<a>){
+    std/data/dict/(.extern-dict-copy){@}(d)
+  };
+// Return the keys in a dictionary
+public fun keys : forall<a,h> (d : mdict<h,a>) -> (read<h>) vector<string>
+  = forall<a,h> fun<(read<h>)>(d:mdict<h,a>){
+    std/data/dict/(.extern-keys){@}(d)
+  };
+// Return the keys in a
+public fun keys .1 : forall<a> (d : dict<a>) -> vector<string>
+  = forall<a> fun(d:dict<a>){
+    std/data/dict/(.extern-keys.1){@}(d)
+  };
+// Index into a string dictionary
+public fun [] : forall<a,h> (md : mdict<h,a>, s : string) -> (read<h>) maybe<a>
+  = forall<a,h> fun<(read<h>)>(md:mdict<h,a>, s:string){
+    match ((std/data/dict/contains-key{@}(md, s))) {
+      std/core/True() -> std/core/Just((std/data/dict/unsafe-index{@}(md, s)))
+      std/core/False() -> std/core/Nothing
+    }
+  };
+// Assign to a string dictionary
+public fun [] .1 : forall<a,h> (md : mdict<h,a>, s : string, assigned : a) -> (write<h>) ()
+  = forall<a,h> fun<(write<h>)>(md:mdict<h,a>, s:string, assigned:a){
+    std/data/dict/(.extern-[]){@}(md, s, assigned)
+  };
+// Index into a string dictionary
+public fun [] .2 : forall<a> (d : dict<a>, key : string) -> maybe<a>
+  = forall<a> fun(d:dict<a>, key:string){
+    match ((std/data/dict/contains-key.1{@}(d, key))) {
+      std/core/True() -> std/core/Just((std/data/dict/unsafe-dict-get{@}(d, key)))
+      std/core/False() -> std/core/Nothing
+    }
+  };
+public fun clear : forall<a,h> (md : mdict<h,a>) -> (write<h>) ()
+  = forall<a,h> fun<(write<h>)>(md:mdict<h,a>){
+    std/data/dict/(.extern-clear){@}(md)
+  };
+public fun copy : forall<h,a> (md : mdict<h,a>) -> <alloc<h>,read<h>> mdict<h,a>
+  = forall<h,a> fun<<alloc<h>,read<h>>>(md:mdict<h,a>){
+    std/data/dict/(.extern-copy){@}(md)
+  };
+public fun count : forall<a,h> (md : mdict<h,a>) -> int
+  = forall<a,h> fun(md:mdict<h,a>){
+    std/data/dict/(.extern-count){@}(md)
+  };
+// Freeze a mutable dictionary into a `:dict`
+public fun freeze : forall<h,a> (md : mdict<h,a>) -> <alloc<h>,read<h>> dict<a>
+  = forall<h,a> fun<<alloc<h>,read<h>>>(md:mdict<h,a>){
+    std/data/dict/(.extern-freeze){@}(md)
+  };
+// Create a mutable string dictionary
+public fun mdict : forall<h,a> () -> (alloc<h>) mdict<h,a>
+  = forall<h,a> fun<(alloc<h>)>(){
+    std/data/dict/(.extern-mdict){@}()
+  };
+public fun remove : forall<a,h> (md : mdict<h,a>, s : string) -> <read<h>,write<h>> ()
+  = forall<a,h> fun<<read<h>,write<h>>>(md:mdict<h,a>, s:string){
+    std/data/dict/(.extern-remove){@}(md, s)
+  };
+// Execute action for each key/value pair in a dictionary until
+// the action returns `Just`.
+public fun* (.bind-foreach-while) : forall<a,b,e> (d : dict<a>, action : (string, a) -> e maybe<b>) -> e maybe<b>
+  = forall<a,b,e> fun<e>(d:dict<a>, action:(string, a) -> e maybe<b>){
+    std/core/(.bind-foreach-while.3){3,2,bind}((std/data/dict/keys.1{1,1,fast}(d)), (fun<e>(k:string){
+        (action(k, (std/data/dict/unsafe-dict-get{@}(d, k))))
+      }))
+  };
+// Execute action for each key/value pair in a dictionary until
+// the action returns `Just`.
+public fun (.fast-foreach-while) : forall<a,b,e> (d : dict<a>, action : (string, a) -> e maybe<b>) -> e maybe<b>
+  = forall<a,b,e> fun<e>(d:dict<a>, action:(string, a) -> e maybe<b>){
+    std/core/(.fast-foreach-while.3){3,2,fast}((std/data/dict/keys.1{1,1,fast}(d)), (fun<e>(k:string){
+        (action(k, (std/data/dict/unsafe-dict-get{@}(d, k))))
+      }))
+  };
+// Execute action for each key/value pair in a dictionary until
+// the action returns `Just`.
+public fun** foreach-while : forall<a,b,e> (d : dict<a>, action : (string, a) -> e maybe<b>) -> e maybe<b>
+  = forall<a,b,e> fun<e>(d:dict<a>, action:(string, a) -> e maybe<b>){
+    std/data/dict/(.bind-foreach-while){3,2,bind}(d, action)
+  };
+// Execute action for each key/value pair in a dictionary.
+public fun* (.bind-foreach) : forall<a,e> (d : dict<a>, action : (string, a) -> e ()) -> e ()
+  = forall<a,e> fun<e>(d:dict<a>, action:(string, a) -> e ()){
+    std/core/bind{@}((std/data/dict/(.bind-foreach-while){3,2,bind}(d, (fun<e>(k:string, x:a){
+          (std/core/bind{@}((action(k, x)), (fun<e>(_:()){
+              std/core/Nothing
+            })))
+        }))), (fun<e>(_0:maybe<void>){
+        std/core/()
+      }))
+  };
+// Execute action for each key/value pair in a dictionary.
+public fun (.fast-foreach) : forall<a,e> (d : dict<a>, action : (string, a) -> e ()) -> e ()
+  = forall<a,e> fun<e>(d:dict<a>, action:(string, a) -> e ()){
+    val _0 : maybe<void>
+          = std/data/dict/(.fast-foreach-while){3,2,fast}(d, (fun<e>(k:string, x:a){
+              val _ : ()
+                    = (action(k, x));
+              std/core/Nothing
+            }));
+    std/core/()
+  };
+// Execute action for each key/value pair in a dictionary.
+public fun** foreach : forall<a,e> (d : dict<a>, action : (string, a) -> e ()) -> e ()
+  = forall<a,e> fun<e>(d:dict<a>, action:(string, a) -> e ()){
+    std/data/dict/(.bind-foreach){2,2,bind}(d, action)
+  };
+// Append two dictionaries.
+public fun (+) : forall<a> (d1 : dict<a>, d2 : dict<a>) -> dict<a>
+  = forall<a> fun(d1:dict<a>, d2:dict<a>){
+    val dnew : dict<a>
+      = std/data/dict/dict-copy{1,1,fast}(d1);;
+    val _ : ()
+      = std/data/dict/foreach{2,2,poly}(d2, (fun(key:string, value:a){
+          (std/data/dict/unsafe-dict-add{@}(dnew, key, value))
+        }));;
+    dnew
+  };
+// Create a new empty dictionary
+public fun dict : forall<a> () -> dict<a>
+  = forall<a> fun(){
+    std/data/dict/(.extern-dict){@}()
+  };
+// Create a new dictionary from a `:list` of key value pairs.
+public fun dict .1 : forall<a> (elems : list<(string, a)>) -> dict<a>
+  = forall<a> fun(elems:list<(string, a)>){
+    val d : dict<a>
+      = std/data/dict/dict{1,0,fast}();;
+    val _ : ()
+      = std/core/foreach{2,2,poly}(elems, (fun(elem:(string, a)){
+          match (elem) {
+            std/core/(,)(key, value) -> std/data/dict/unsafe-dict-add{@}(d, key, value)
+          }
+        }));;
+    d
+  };
+// Create a new dictionary from a `:vector` of key/value pairs.
+public fun dict .2 : forall<a> (elems : vector<(string, a)>) -> dict<a>
+  = forall<a> fun(elems:vector<(string, a)>){
+    val d : dict<a>
+      = std/data/dict/dict{1,0,fast}();;
+    val _ : ()
+      = std/core/foreach.3{2,2,poly}(elems, (fun(elem:(string, a)){
+          match (elem) {
+            std/core/(,)(key, value) -> std/data/dict/unsafe-dict-add{@}(d, key, value)
+          }
+        }));;
+    d
+  };
+// Map a fun over the values in a dictionary.
+public fun* (.bind-map) : forall<a,b,e> (d : dict<a>, f : (string, a) -> e b) -> e dict<b>
+  = forall<a,b,e> fun<e>(d:dict<a>, f:(string, a) -> e b){
+    std/core/bind{@}((std/core/(.bind-map.7){3,2,bind}((std/data/dict/keys.1{1,1,fast}(d)), (fun<e>(k:string){
+          (std/core/bind{@}((f(k, (std/data/dict/unsafe-dict-get{@}(d, k)))), (fun<e>(.y.8:b){
+              (std/core/(,)(k, .y.8))
+            })))
+        }))), (fun<e>(.y.10:vector<(string, b)>){
+        (std/data/dict/dict.2{1,1,fast}(.y.10))
+      }))
+  };
+// Map a fun over the values in a dictionary.
+public fun (.fast-map) : forall<a,b,e> (d : dict<a>, f : (string, a) -> e b) -> e dict<b>
+  = forall<a,b,e> fun<e>(d:dict<a>, f:(string, a) -> e b){
+    std/data/dict/dict.2{1,1,fast}((std/core/(.fast-map.7){3,2,fast}((std/data/dict/keys.1{1,1,fast}(d)), (fun<e>(k:string){
+        (std/core/(,)(k, (f(k, (std/data/dict/unsafe-dict-get{@}(d, k))))))
+      }))))
+  };
+// Map a fun over the values in a dictionary.
+public fun** map : forall<a,b,e> (d : dict<a>, f : (string, a) -> e b) -> e dict<b>
+  = forall<a,b,e> fun<e>(d:dict<a>, f:(string, a) -> e b){
+    std/data/dict/(.bind-map){3,2,bind}(d, f)
+  };
+// Convert a dictionary to a vector of key/value pairs
+public fun vector : forall<a,h> (d : mdict<h,a>) -> (read<h>) vector<(string, a)>
+  = forall<a,h> fun<(read<h>)>(d:mdict<h,a>){
+    std/core/map.7{3,2,poly}((std/data/dict/keys{2,1,fast}(d)), (fun<(read<h>)>(key:string){
+        (std/core/(,)(key, (std/data/dict/unsafe-index{@}(d, key))))
+      }))
+  };
+// Convert a dictionary to a vector of key/value pairs
+public fun vector .1 : forall<a> (d : dict<a>) -> vector<(string, a)>
+  = forall<a> fun(d:dict<a>){
+    std/core/map.7{3,2,poly}((std/data/dict/keys.1{1,1,fast}(d)), (fun(key:string){
+        (std/core/(,)(key, (std/data/dict/unsafe-dict-get{@}(d, key))))
+      }))
+  };
+// Convert a dictionary to a list of key/value pairs
+public fun list : forall<a,h> (d : mdict<h,a>) -> (read<h>) list<(string, a)>
+  = forall<a,h> fun<(read<h>)>(d:mdict<h,a>){
+    std/core/list.5{1,1,fast}((std/data/dict/vector{2,1,fast}(d)))
+  };
+// Convert a dictionary to a list of key/value pairs
+public fun list .1 : forall<a> (d : dict<a>) -> list<(string, a)>
+  = forall<a> fun(d:dict<a>){
+    std/core/list.5{1,1,fast}((std/data/dict/vector.1{1,1,fast}(d)))
+  };
+// Create a mutable string dictionary
+external (.extern-mdict) : forall<h,a> () -> (alloc<h>) mdict<h,a> {
+  cs inline "new Primitive.MDict<##1,##2>()";
+  js inline "{ _count: 0 }";
+}
+external unsafe-index : forall<a,h> (md : mdict<h,a>, s : string) -> (read<h>) a {
+  cs inline "((#1)[#2])";
+  js inline "((#1)['/' + #2])";
+}
+public external contains-key : forall<a,h> (md : mdict<h,a>, s : string) -> (read<h>) bool {
+  cs inline "((#1).ContainsKey(#2))";
+  js inline "((#1)['/' + #2]!==undefined)";
+}
+// Return the keys in a dictionary
+external (.extern-keys) : forall<a,h> (d : mdict<h,a>) -> (read<h>) vector<string> {
+  cs inline "Primitive.DictKeys(#1)";
+  js inline "_dict_keys(#1)";
+}
+// Assign to a string dictionary
+external (.extern-[]) : forall<a,h> (md : mdict<h,a>, s : string, assigned : a) -> (write<h>) () {
+  cs inline "(#1)[#2] = #3";
+  js inline "_dict_assign(#1,#2,#3)";
+}
+external (.extern-copy) : forall<h,a> (md : mdict<h,a>) -> <alloc<h>,read<h>> mdict<h,a> {
+  cs inline "new Primitive.MDict<##1,##2>(#1)";
+  js inline "_dict_copy(#1)";
+}
+// Freeze a mutable dictionary into a `:dict`
+external (.extern-freeze) : forall<h,a> (md : mdict<h,a>) -> <alloc<h>,read<h>> dict<a> {
+  cs inline "new Primitive.Dict<##2>(#1)";
+  js inline "_dict_copy(#1)";
+}
+external (.extern-clear) : forall<a,h> (md : mdict<h,a>) -> (write<h>) () {
+  cs inline "(#1).Clear()";
+  js inline "_dict_clear(#1)";
+}
+external (.extern-remove) : forall<a,h> (md : mdict<h,a>, s : string) -> <read<h>,write<h>> () {
+  cs inline "(#1).Remove(#2)";
+  js inline "delete #1['/'+#2]";
+}
+external (.extern-count) : forall<a,h> (md : mdict<h,a>) -> int {
+  cs inline "(#1).Count";
+  js inline "#1._count";
+}
+external null? : forall<a> (x : a) -> bool = inline "(#1 == null)";
+// Create a new empty dictionary
+external (.extern-dict) : forall<a> () -> dict<a> {
+  cs inline "new Primitive.Dict<##1>()";
+  js inline "{ _count: 0 }";
+}
+external unsafe-dict-add : forall<a> (d : dict<a>, key : string, value : a) -> () {
+  cs inline "(#1)[#2] = (#3)";
+  js inline "_dict_assign(#1,#2,#3)";
+}
+external unsafe-dict-get : forall<a> (d : dict<a>, key : string) -> a {
+  cs inline "(#1)[#2]";
+  js inline "((#1)['/' + #2])";
+}
+public external contains-key .1 : forall<a> (d : dict<a>, key : string) -> bool {
+  cs inline "((#1).ContainsKey(#2))";
+  js inline "((#1)['/' + #2]!==undefined)";
+}
+external (.extern-dict-copy) : forall<a> (d : dict<a>) -> dict<a> {
+  cs inline "new Primitive.Dict<##1>(#1)";
+  js inline "_dict_copy(#1)";
+}
+// Return the keys in a
+external (.extern-keys) .1 : forall<a> (d : dict<a>) -> vector<string> {
+  cs inline "Primitive.DictKeys(#1)";
+  js inline "_dict_keys(#1)";
+}

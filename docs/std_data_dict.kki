@@ -1,0 +1,82 @@
+/* String dictionaries.
+*/
+module interface std/data/dict
+/* This module defines standard operations that are always available.
+
+   Some types and operations are required to be defined for the compiler
+   to work correctly (i.e. types like `:int` or `:list`)
+*/
+import std/core = std/core = "";
+// A dictionary is a map from strings to values
+type dict <a> :: V -> V ;
+// The type of mutable string dictionaries
+type mdict <(h :: H),a> :: (H, V) -> V ;
+// Return the keys in a dictionary
+fun keys : forall<a,(h :: H)> (d : (mdict :: (H, V) -> V)<(h :: H),a>) -> <(std/core/read :: H -> X)<(h :: H)>> (std/core/vector :: V -> V)<std/core/string>;
+// Return the keys in a
+fun keys .1 : forall<a> (d : (dict :: V -> V)<a>) -> (std/core/vector :: V -> V)<std/core/string>;
+// Index into a string dictionary
+fun [] : forall<a,(h :: H)> (md : (mdict :: (H, V) -> V)<(h :: H),a>, s : std/core/string) -> <(std/core/read :: H -> X)<(h :: H)>> (std/core/maybe :: V -> V)<a>;
+// Assign to a string dictionary
+fun [] .1 : forall<a,(h :: H)> (md : (mdict :: (H, V) -> V)<(h :: H),a>, s : std/core/string, assigned : a) -> <(std/core/write :: H -> X)<(h :: H)>> ();
+// Index into a string dictionary
+fun [] .2 : forall<a> (d : (dict :: V -> V)<a>, key : std/core/string) -> (std/core/maybe :: V -> V)<a>;
+fun clear : forall<a,(h :: H)> (md : (mdict :: (H, V) -> V)<(h :: H),a>) -> <(std/core/write :: H -> X)<(h :: H)>> ();
+fun copy : forall<(h :: H),a> (md : (mdict :: (H, V) -> V)<(h :: H),a>) -> <(std/core/alloc :: H -> X)<(h :: H)>,(std/core/read :: H -> X)<(h :: H)>> (mdict :: (H, V) -> V)<(h :: H),a>;
+fun count : forall<a,(h :: H)> (md : (mdict :: (H, V) -> V)<(h :: H),a>) -> std/core/int;
+// Freeze a mutable dictionary into a `:dict`
+fun freeze : forall<(h :: H),a> (md : (mdict :: (H, V) -> V)<(h :: H),a>) -> <(std/core/alloc :: H -> X)<(h :: H)>,(std/core/read :: H -> X)<(h :: H)>> (dict :: V -> V)<a>;
+// Create a mutable string dictionary
+fun mdict : forall<(h :: H),a> () -> <(std/core/alloc :: H -> X)<(h :: H)>> (mdict :: (H, V) -> V)<(h :: H),a>;
+fun remove : forall<a,(h :: H)> (md : (mdict :: (H, V) -> V)<(h :: H),a>, s : std/core/string) -> <(std/core/read :: H -> X)<(h :: H)>,(std/core/write :: H -> X)<(h :: H)>> ();
+// Execute action for each key/value pair in a dictionary until
+// the action returns `Just`.
+fun* (.bind-foreach-while) : forall<a,b,(e :: E)> (d : (dict :: V -> V)<a>, action : (std/core/string, a) -> (e :: E) (std/core/maybe :: V -> V)<b>) -> (e :: E) (std/core/maybe :: V -> V)<b>;
+// Execute action for each key/value pair in a dictionary until
+// the action returns `Just`.
+fun (.fast-foreach-while) : forall<a,b,(e :: E)> (d : (dict :: V -> V)<a>, action : (std/core/string, a) -> (e :: E) (std/core/maybe :: V -> V)<b>) -> (e :: E) (std/core/maybe :: V -> V)<b>;
+// Execute action for each key/value pair in a dictionary until
+// the action returns `Just`.
+fun** foreach-while : forall<a,b,(e :: E)> (d : (dict :: V -> V)<a>, action : (std/core/string, a) -> (e :: E) (std/core/maybe :: V -> V)<b>) -> (e :: E) (std/core/maybe :: V -> V)<b>;
+// Execute action for each key/value pair in a dictionary.
+fun* (.bind-foreach) : forall<a,(e :: E)> (d : (dict :: V -> V)<a>, action : (std/core/string, a) -> (e :: E) ()) -> (e :: E) ();
+// Execute action for each key/value pair in a dictionary.
+fun (.fast-foreach) : forall<a,(e :: E)> (d : (dict :: V -> V)<a>, action : (std/core/string, a) -> (e :: E) ()) -> (e :: E) ();
+// Execute action for each key/value pair in a dictionary.
+fun** foreach : forall<a,(e :: E)> (d : (dict :: V -> V)<a>, action : (std/core/string, a) -> (e :: E) ()) -> (e :: E) ();
+// Append two dictionaries.
+fun (+) : forall<a> (d1 : (dict :: V -> V)<a>, d2 : (dict :: V -> V)<a>) -> (dict :: V -> V)<a>;
+// Create a new empty dictionary
+fun dict : forall<a> () -> (dict :: V -> V)<a>;
+// Create a new dictionary from a `:list` of key value pairs.
+fun dict .1 : forall<a> (elems : (std/core/list :: V -> V)<(std/core/string, a)>) -> (dict :: V -> V)<a>;
+// Create a new dictionary from a `:vector` of key/value pairs.
+fun dict .2 : forall<a> (elems : (std/core/vector :: V -> V)<(std/core/string, a)>) -> (dict :: V -> V)<a>;
+// Map a fun over the values in a dictionary.
+fun* (.bind-map) : forall<a,b,(e :: E)> (d : (dict :: V -> V)<a>, f : (std/core/string, a) -> (e :: E) b) -> (e :: E) (dict :: V -> V)<b>;
+// Map a fun over the values in a dictionary.
+fun (.fast-map) : forall<a,b,(e :: E)> (d : (dict :: V -> V)<a>, f : (std/core/string, a) -> (e :: E) b) -> (e :: E) (dict :: V -> V)<b>;
+// Map a fun over the values in a dictionary.
+fun** map : forall<a,b,(e :: E)> (d : (dict :: V -> V)<a>, f : (std/core/string, a) -> (e :: E) b) -> (e :: E) (dict :: V -> V)<b>;
+// Convert a dictionary to a vector of key/value pairs
+fun vector : forall<a,(h :: H)> (d : (mdict :: (H, V) -> V)<(h :: H),a>) -> <(std/core/read :: H -> X)<(h :: H)>> (std/core/vector :: V -> V)<(std/core/string, a)>;
+// Convert a dictionary to a vector of key/value pairs
+fun vector .1 : forall<a> (d : (dict :: V -> V)<a>) -> (std/core/vector :: V -> V)<(std/core/string, a)>;
+// Convert a dictionary to a list of key/value pairs
+fun list : forall<a,(h :: H)> (d : (mdict :: (H, V) -> V)<(h :: H),a>) -> <(std/core/read :: H -> X)<(h :: H)>> (std/core/list :: V -> V)<(std/core/string, a)>;
+// Convert a dictionary to a list of key/value pairs
+fun list .1 : forall<a> (d : (dict :: V -> V)<a>) -> (std/core/list :: V -> V)<(std/core/string, a)>;
+// Create a mutable string dictionary
+external contains-key : forall<a,(h :: H)> (md : (mdict :: (H, V) -> V)<(h :: H),a>, s : std/core/string) -> <(std/core/read :: H -> X)<(h :: H)>> std/core/bool {
+  cs inline "((#1).ContainsKey(#2))";
+  js inline "((#1)['/' + #2]!==undefined)";
+}
+// Return the keys in a dictionary
+// Assign to a string dictionary
+// Freeze a mutable dictionary into a `:dict`
+// Create a new empty dictionary
+external contains-key .1 : forall<a> (d : (dict :: V -> V)<a>, key : std/core/string) -> std/core/bool {
+  cs inline "((#1).ContainsKey(#2))";
+  js inline "((#1)['/' + #2]!==undefined)";
+}
+// Return the keys in a
