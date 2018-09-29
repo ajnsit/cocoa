@@ -9,33 +9,27 @@ import sys/dom/html/window // document
 import concur/dom
 import concur/props
 
-struct st<h>(prevNode: ref<h, maybe<vnode>>, container: htmlElement)
+abstract struct internalSt<h>(prevNode: ref<h, maybe<vnode>>, container: htmlElement)
 
-// View function
-public fun view (count: int, st: st<_h>): _ vnode {
-  h("div", props(), vector([
-    h("h1", props(), vector([t(count.show)])),
-    h("button", props([("onclick", mkHandler0 { render(count - 1, st) })]), vector([t("-")])),
-    h("button", props([("onclick", mkHandler0 { render(count + 1, st) })]), vector([t("+")]))
-  ]))
-}
+// NOTE: I have to spell out all the effect types in the type sigs because I get runtime errors without them.
+// "`_bind_render` is undefined". Seems like a compiler bug.
 
-// Render function
-public fun render(state: int, st: st<_h>): _ () {
-  val prevNode = st.prevNode
+// Render
+public fun render<s,e>(view: (s, internalSt<sys/dom/types/hdom>) -> <st<sys/dom/types/hdom>,ui,exn,net,console,ndet|e> vnode , ist: internalSt<_h>, state: s):  <st<sys/dom/types/hdom>,ui,exn,net,console,ndet|e> () {
+  val prevNode = ist.prevNode
   val prevNodeVal = !prevNode
-  prevNode := Just(patch(null(prevNodeVal), view(state, st), st.container))
+  prevNode := Just(patch(null(prevNodeVal), view(state, ist), ist.container))
 }
 
-// Main
-public fun main() : _ () {
+// Run
+public fun run<s,e>(initState: s, view: (s, internalSt<sys/dom/types/hdom>) -> <st<sys/dom/types/hdom>,ui,exn,net,console,ndet|e> vnode):  <st<sys/dom/types/hdom>,ui,exn,net,console,ndet|e> () {
   // Oh noes: mutation
-  // val prevNode: ref<h, maybe<vnode>> = ref(Nothing)
   val prevNode = ref(Nothing)
 
   // Gain access to the global window object
   withWindow fun(window : window) {
     // Start
-    render(0, St(prevNode, window.document.body))
+    render(view, InternalSt(prevNode, window.document.body), initState)
   }
 }
+
